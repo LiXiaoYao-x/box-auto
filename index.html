@@ -7,89 +7,131 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg0:#03080f;--bg1:#070f1e;--bg2:#0b1526;--bg3:#0f1d32;
-  --bd:#152032;--bd2:#1c2e45;--bd3:#243a55;
-  --t1:#c4d8f0;--t2:#557898;--t3:#2a4460;
-  --blue:#2a6fd4;--blue2:#1a4898;--teal:#18b09e;
-  --amber:#dda020;--red:#d84040;--green:#28a860;
+  --bg0:#f0f4f8;--bg1:#ffffff;--bg2:#f7fafc;--bg3:#edf2f7;
+  --bd:#e2e8f0;--bd2:#cbd5e0;--bd3:#a0b4c8;
+  --t1:#1a2535;--t2:#4a6280;--t3:#8fa5be;
+  --blue:#2563eb;--blue-lt:#eff6ff;--blue-md:#dbeafe;
+  --teal:#0d9488;--amber:#b45309;--amber-lt:#fef3c7;
+  --red:#dc2626;--green:#16a34a;
+  --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.04);
   --r:10px;
 }
-body{background:var(--bg0);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;min-height:100vh;padding-bottom:48px}
-#app{max-width:660px;margin:0 auto;padding:0 14px}
+body{background:var(--bg0);color:var(--t1);font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',system-ui,sans-serif;min-height:100vh;padding-bottom:60px}
+#app{max-width:700px;margin:0 auto;padding:0 16px}
+
 /* Header */
-.hd{padding:18px 0 16px;border-bottom:1px solid var(--bd)}
-.hd h1{font-size:20px;font-weight:700;color:var(--blue);letter-spacing:-.3px}
-.hd p{font-size:11px;color:var(--t3);margin-top:4px}
-/* Unit bar */
-.ubar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
-.ubar span{font-size:12px;color:var(--t2)}
-.ubtn-g{display:flex;border:1px solid var(--bd2);border-radius:6px;overflow:hidden}
-.ubtn{padding:5px 14px;background:transparent;border:none;color:var(--t2);font-size:13px;cursor:pointer;transition:.15s}
-.ubtn.on{background:var(--blue2);color:#fff}
-.ubtn:not(.on):active{background:var(--bg3)}
-.cvt-lbl{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none}
+.hd{padding:20px 0 16px;border-bottom:2px solid var(--bd)}
+.hd h1{font-size:21px;font-weight:800;color:var(--blue);letter-spacing:-.4px}
+.hd p{font-size:12px;color:var(--t3);margin-top:4px;line-height:1.5}
+.hd-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ubar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ubar-lbl{font-size:12px;color:var(--t2);font-weight:600}
+.ubtn-g{display:flex;border:1.5px solid var(--bd2);border-radius:7px;overflow:hidden}
+.ubtn{padding:5px 14px;background:transparent;border:none;color:var(--t2);font-size:13px;cursor:pointer;transition:.15s;font-weight:600}
+.ubtn.on{background:var(--blue);color:#fff}
+.ubtn:not(.on):hover{background:var(--blue-lt);color:var(--blue)}
+.cvt-lbl{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none;font-weight:500}
 .cvt-lbl input{cursor:pointer;accent-color:var(--blue);width:13px;height:13px}
+.print-btn{display:flex;align-items:center;gap:5px;padding:6px 14px;background:var(--bg1);border:1.5px solid var(--bd2);border-radius:7px;font-size:12px;color:var(--t2);cursor:pointer;font-weight:600;transition:.15s;font-family:inherit}
+.print-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt)}
+.print-btn svg{width:14px;height:14px;flex-shrink:0}
+
 /* Card */
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-top:12px}
-.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
-.ctitle{font-size:13px;font-weight:600;color:var(--blue)}
-select{background:var(--bg3);border:1px solid var(--bd2);border-radius:6px;color:var(--t1);font-size:12px;padding:5px 8px;cursor:pointer;outline:none}
+.card{background:var(--bg1);border:1.5px solid var(--bd);border-radius:var(--r);padding:16px;margin-top:14px;box-shadow:var(--shadow)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+.ctitle{font-size:13px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:8px}
+.ctitle-bar{width:3px;height:15px;background:var(--blue);border-radius:2px;flex-shrink:0}
+select{background:var(--bg2);border:1.5px solid var(--bd2);border-radius:7px;color:var(--t1);font-size:12px;padding:5px 9px;cursor:pointer;outline:none;font-family:inherit;font-weight:500;max-width:100%}
+select:focus{border-color:var(--blue)}
+
 /* Form grid */
-.drow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.drow.four{grid-template-columns:repeat(4,1fr)}
-.df label{font-size:11px;color:var(--t2);display:block;margin-bottom:4px}
-.iu{display:flex}
-.iu input{flex:1;background:var(--bg1);border:1px solid var(--bd2);border-right:none;border-radius:6px 0 0 6px;color:var(--t1);font-size:13px;padding:7px 7px;outline:none;min-width:0;transition:.15s}
-.iu input:focus{border-color:var(--blue)}
-.iu .u{background:var(--bg3);border:1px solid var(--bd2);border-radius:0 6px 6px 0;color:var(--t2);font-size:11px;padding:7px 6px;white-space:nowrap}
-input[type=text]{background:var(--bg1);border:1px solid var(--bd2);border-radius:6px;color:var(--t1);font-size:13px;padding:7px 10px;outline:none;transition:.15s;width:100%}
-input[type=text]:focus{border-color:var(--blue)}
+.drow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:500px){.drow{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:330px){.drow{grid-template-columns:1fr}}
+.df label{font-size:11px;color:var(--t2);display:block;margin-bottom:5px;font-weight:600;letter-spacing:.01em}
+.iu{display:flex;min-width:0}
+.iu input{flex:1;min-width:0;width:0;background:var(--bg2);border:1.5px solid var(--bd2);border-right:none;border-radius:7px 0 0 7px;color:var(--t1);font-size:13px;padding:7px 8px;outline:none;transition:.15s;font-family:inherit;font-weight:500}
+.iu input:focus{border-color:var(--blue);background:#fff}
+.iu .u{background:var(--bg3);border:1.5px solid var(--bd2);border-radius:0 7px 7px 0;color:var(--t2);font-size:11px;padding:7px 7px;white-space:nowrap;font-weight:600;flex-shrink:0}
+input[type=text]{background:var(--bg2);border:1.5px solid var(--bd2);border-radius:7px;color:var(--t1);font-size:13px;padding:7px 10px;outline:none;transition:.15s;width:100%;font-family:inherit;font-weight:500}
+input[type=text]:focus{border-color:var(--blue);background:#fff}
+
 /* Box tabs */
-.btabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.btab{padding:4px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--t2);display:flex;align-items:center;gap:5px;transition:.15s}
+.btabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.btab{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1.5px solid var(--bd2);background:transparent;color:var(--t2);display:flex;align-items:center;gap:5px;transition:.15s;font-family:inherit;font-weight:600}
 .btab.on{color:#fff}
+.btab:not(.on):hover{background:var(--blue-lt);border-color:var(--blue);color:var(--blue)}
 .bdot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-.bdel{color:#d05050;font-size:15px;line-height:1;margin-left:1px}
+.bdel{color:#c03030;font-size:16px;line-height:1;margin-left:2px;font-weight:700}
+
 /* Note */
-.vnote{background:var(--bg3);border:1px solid var(--bd2);border-left:3px solid var(--amber);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--t2);margin-top:12px}
-/* KPI */
-.krow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.kcard{background:var(--bg1);border:1px solid var(--bd);border-radius:8px;padding:12px 8px;text-align:center}
-.kval{font-size:22px;font-weight:700;line-height:1}
-.klbl{font-size:11px;color:var(--t2);margin-top:5px}
-.ksub{font-size:11px;color:var(--t3);margin-top:3px}
+.vnote{background:var(--amber-lt);border:1.5px solid #fcd34d;border-left:3px solid var(--amber);border-radius:7px;padding:10px 12px;font-size:12px;color:var(--amber);margin-top:14px;line-height:1.65;font-weight:500}
+
+/* KPI cards */
+.krow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:380px){.krow{grid-template-columns:repeat(2,1fr)}}
+.kcard{background:var(--bg0);border:1.5px solid var(--bd);border-radius:9px;padding:13px 8px;text-align:center}
+.kval{font-size:22px;font-weight:900;line-height:1}
+.klbl{font-size:11px;color:var(--t2);margin-top:5px;font-weight:600}
+.ksub{font-size:11px;color:var(--t3);margin-top:2px;font-weight:500}
+
 /* Remainder row */
-.rrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
-.ritem{background:var(--bg1);border-radius:6px;padding:7px;text-align:center;border:1px solid var(--bd)}
-.rval{font-size:14px;font-weight:600;color:var(--amber)}
-.rlbl{font-size:10px;color:var(--t3);margin-top:2px}
-/* Detail */
+.rrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.ritem{background:var(--bg0);border-radius:8px;padding:9px 8px;text-align:center;border:1.5px solid var(--bd)}
+.rval{font-size:14px;font-weight:700;color:var(--amber)}
+.rlbl{font-size:10px;color:var(--t3);margin-top:3px;font-weight:600}
+
+/* Detail list */
 .dlist{list-style:none}
-.dlist li{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.dlist li{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px;gap:10px;flex-wrap:wrap}
 .dlist li:last-child{border-bottom:none}
-.dk{color:var(--t2)}.dv{font-weight:500}
-/* Btn */
-.addbtn{background:transparent;border:1px dashed var(--bd2);color:var(--t3);border-radius:6px;padding:7px 12px;font-size:12px;cursor:pointer;transition:.15s;width:100%;margin-top:2px}
-.addbtn:hover{border-color:var(--blue);color:var(--blue)}
+.dk{color:var(--t2);font-weight:600;flex-shrink:0;padding-top:1px}
+.dv{font-weight:700;text-align:right;flex:1;min-width:0;word-break:break-all}
+
+/* Mix badge */
+.mix-badge{display:inline-flex;align-items:center;gap:4px;background:var(--blue-md);color:var(--blue);border-radius:5px;font-size:11px;font-weight:800;padding:2px 8px;letter-spacing:.02em}
+.new-badge{display:inline-flex;align-items:center;background:#dcfce7;color:var(--green);border-radius:4px;font-size:10px;font-weight:800;padding:1px 6px;margin-left:4px}
+
+/* Buttons */
+.addbtn{background:transparent;border:1.5px dashed var(--bd2);color:var(--t3);border-radius:7px;padding:7px 12px;font-size:12px;cursor:pointer;transition:.15s;font-family:inherit;font-weight:600}
+.addbtn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt)}
+
 /* Canvas */
 canvas{display:block;width:100%}
-.cv-wrap{position:relative;border-radius:8px;overflow:hidden;cursor:grab}
+.cv-wrap{position:relative;border-radius:9px;overflow:hidden;cursor:grab;border:1.5px solid var(--bd);background:var(--bg2)}
 .cv-wrap:active{cursor:grabbing}
+.cv-legend{display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--t2);flex-wrap:wrap;font-weight:600}
+.cv-leg-item{display:flex;align-items:center;gap:6px}
+
 /* Compare table */
-.cmptbl{width:100%;border-collapse:collapse;font-size:13px}
-.cmptbl th{background:var(--bg1);color:var(--t2);font-weight:500;padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd)}
-.cmptbl td{padding:8px 10px;border-bottom:1px solid var(--bd)}
+.tbl-wrap{overflow-x:auto}
+.cmptbl{width:100%;border-collapse:collapse;font-size:13px;min-width:360px}
+.cmptbl th{background:var(--bg0);color:var(--t2);font-weight:700;padding:9px 10px;text-align:left;border-bottom:2px solid var(--bd);white-space:nowrap}
+.cmptbl td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
 .cmptbl tr:last-child td{border-bottom:none}
-/* Msg */
-.msg{text-align:center;color:var(--t3);padding:24px;font-size:13px}
-/* Loading */
-.loading{text-align:center;color:var(--t2);padding:20px;font-size:13px}
+.cmptbl tr:hover td{background:var(--blue-lt)}
+
 /* Info bar */
-.ibar{font-size:11px;color:var(--t3);margin-top:6px;text-align:right}
-@media(max-width:420px){
-  .drow{grid-template-columns:repeat(3,1fr)}
-  .krow{grid-template-columns:repeat(3,1fr)}
-  .kval{font-size:18px}
+.ibar{font-size:11px;color:var(--t3);margin-top:8px;text-align:right;font-weight:500}
+.msg{text-align:center;color:var(--t3);padding:28px;font-size:13px}
+
+/* Section divider in results */
+.result-hd{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;padding:12px 0 4px;display:flex;align-items:center;gap:8px}
+.result-hd::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+/* Print */
+@media print{
+  body{background:#fff!important;padding:0}
+  #app{max-width:100%!important;padding:0 12px}
+  .no-print{display:none!important}
+  .hd{padding:10px 0 8px}
+  .card{box-shadow:none!important;border:1px solid #ddd!important;break-inside:avoid;page-break-inside:avoid;margin-top:10px}
+  canvas{break-inside:avoid;page-break-inside:avoid}
+  .cv-wrap{border:1px solid #ccc!important}
+  .kcard,.ritem{background:#f8f8f8!important;border:1px solid #ddd!important}
+  .cmptbl th{background:#f0f0f0!important}
+  .vnote{background:#fff9e6!important;border-color:#f0d060!important}
+  h1{font-size:18px!important}
 }
 </style>
 </head>
@@ -98,25 +140,35 @@ canvas{display:block;width:100%}
   <!-- Header -->
   <div class="hd">
     <h1>集装箱装载优化</h1>
-    <p>垂直摆放约束 · 自动计算最大装箱数 · 平面 &amp; 立体可视化</p>
-    <div class="ubar">
-      <span>单位:</span>
-      <div class="ubtn-g">
-        <button class="ubtn" data-u="mm">mm</button>
-        <button class="ubtn on" data-u="cm">cm</button>
-        <button class="ubtn" data-u="m">m</button>
+    <p>垂直摆放约束 · 混合朝向算法（自动搜索最优排列）· 平面 &amp; 立体可视化</p>
+    <div class="hd-bar">
+      <div class="ubar">
+        <span class="ubar-lbl">单位:</span>
+        <div class="ubtn-g">
+          <button class="ubtn" data-u="mm">mm</button>
+          <button class="ubtn on" data-u="cm">cm</button>
+          <button class="ubtn" data-u="m">m</button>
+        </div>
+        <label class="cvt-lbl">
+          <input type="checkbox" id="chk-cvt" checked>
+          切换时自动换算
+        </label>
       </div>
-      <label class="cvt-lbl">
-        <input type="checkbox" id="chk-cvt" checked>
-        切换时自动换算数值
-      </label>
+      <button class="print-btn no-print" onclick="window.print()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        打印报告
+      </button>
     </div>
   </div>
 
   <!-- Container dims -->
   <div class="card">
     <div class="card-hd">
-      <span class="ctitle">集装箱内部尺寸</span>
+      <span class="ctitle"><span class="ctitle-bar"></span>集装箱内部尺寸</span>
       <select id="sel-preset">
         <option value="">自定义</option>
         <option value="20std">20尺标准柜 (5898×2352×2393 mm)</option>
@@ -136,12 +188,12 @@ canvas{display:block;width:100%}
   <!-- Box types -->
   <div class="card">
     <div class="card-hd">
-      <span class="ctitle">产品箱子规格</span>
-      <button class="addbtn" id="btn-add" style="width:auto;padding:5px 12px;margin:0">＋ 添加产品</button>
+      <span class="ctitle"><span class="ctitle-bar"></span>产品箱子规格</span>
+      <button class="addbtn no-print" id="btn-add" style="width:auto;padding:5px 12px;margin:0">＋ 添加产品</button>
     </div>
     <div class="btabs" id="btabs"></div>
     <div id="bform"></div>
-    <div class="vnote">⚠ 液体产品垂直摆放，高度方向锁定不可翻转。底面朝向自动尝试旋转 90° 以最大化利用率。</div>
+    <div class="vnote">⚠ 液体产品垂直摆放，高度方向锁定不可翻转。系统自动枚举所有排列方案（原始朝向、旋转90°、混合双向排列），取最大装箱数。</div>
   </div>
 
   <!-- Results -->
@@ -151,124 +203,165 @@ canvas{display:block;width:100%}
 <script>
 'use strict';
 
-// ═══════════════════════════════════════════════════════
-// Constants & State
-// ═══════════════════════════════════════════════════════
-
-const UF = { mm:1, cm:10, m:1000 };
-const UD = { mm:0, cm:1, m:3 };
-const COLORS = ['#3a80e0','#e8762a','#18b09e','#c040b8','#d8c020','#28a860','#d84060','#7050e0'];
-const PRESETS = {
+const UF={mm:1,cm:10,m:1000};
+const UD={mm:0,cm:1,m:3};
+const COLORS=['#3a80e0','#e8762a','#18b09e','#c040b8','#d8c020','#28a860','#d84060','#7050e0'];
+const PRESETS={
   '20std':{L:5898,W:2352,H:2393},
   '40std':{L:12032,W:2352,H:2393},
   '40hc': {L:12032,W:2352,H:2698},
   '45hc': {L:13556,W:2352,H:2698},
 };
 
-let unit = 'cm';
-let autoCvt = true;
-let cont = {L:5900,W:2350,H:2390}; // internal mm
-let boxes = [{id:1,name:'产品A',l:400,w:300,h:350,color:COLORS[0]}];
-let activeIdx = 0;
-let nextId = 2;
-let isoRot = {y:0.6, x:-0.3};
-let isoDrag = null;
+let unit='cm';
+let autoCvt=true;
+let cont={L:5900,W:2350,H:2390};
+let boxes=[{id:1,name:'产品A',l:400,w:300,h:350,color:COLORS[0]}];
+let activeIdx=0;
+let nextId=2;
 
-// ═══════════════════════════════════════════════════════
-// Unit helpers
-// ═══════════════════════════════════════════════════════
+// ── Unit helpers ─────────────────────────────────────────
+const mmToD=mm=>{const v=mm/UF[unit];const d=UD[unit];return d===0?Math.round(v):parseFloat(v.toFixed(d))};
+const dToMM=v=>(parseFloat(v)||0)*UF[unit];
+const fmt=mm=>mmToD(mm).toString();
+const fmtU=mm=>fmt(mm)+'\u202f'+unit;
 
-const mmToD = mm => {
-  const v = mm / UF[unit];
-  const d = UD[unit];
-  return d===0 ? Math.round(v) : parseFloat(v.toFixed(d));
-};
-const dToMM = v => (parseFloat(v)||0) * UF[unit];
-const fmt = mm => mmToD(mm).toString();
-const fmtU = mm => fmt(mm) + ' ' + unit;
+// ── Packing algorithm: vertical-lock + exhaustive mixed-strip ──
+//
+// For a box bl×bw footprint (bh locked as height), we try:
+//   1. Simple orientations: all bl×bw or all bw×bl
+//   2. Mixed W-strips: a strips of width=bw (orient bl×bw) +
+//                      b strips of width=bl (orient bw×bl), stacked in W
+//   3. Mixed L-strips: c strips of length=bl (orient bl×bw) +
+//                      d strips of length=bw (orient bw×bl), stacked in L
+// Returns the combination with maximum total boxes.
+//
+function calcPack(cL,cW,cH,bl,bw,bh){
+  if(!cL||!cW||!cH||!bl||!bw||!bh)return null;
+  if(bh>cH)return null;
+  const nz=Math.floor(cH/bh);
+  if(!nz)return null;
+  const remH=cH-nz*bh;
 
-// ═══════════════════════════════════════════════════════
-// Packing algorithm (vertical only)
-// ═══════════════════════════════════════════════════════
+  let best=null;
+  const tryR=r=>{
+    if(r&&r.total>0&&(!best||r.total>best.total||(r.total===best.total&&r.util>best.util)))best=r;
+  };
 
-function calcPack(cL,cW,cH,bl,bw,bh) {
-  if(!cL||!cW||!cH||!bl||!bw||!bh) return null;
-  if(bh>cH) return null;
-  let best = null;
-  for(const [bx,by] of [[bl,bw],[bw,bl]]) {
-    if(bx>cL||by>cW) continue;
-    const nx=Math.floor(cL/bx), ny=Math.floor(cW/by), nz=Math.floor(cH/bh);
-    const total=nx*ny*nz;
-    if(!best||total>best.total) {
-      best={nx,ny,nz,total,bx,by,bz:bh,
-        perLayer:nx*ny,
-        remL:cL-nx*bx, remW:cW-ny*by, remH:cH-nz*bh,
-        util:total?(nx*bx*ny*by*nz*bh)/(cL*cW*cH)*100:0,
-        rotated:bx!==bl};
+  const mkSimple=(bx,by)=>{
+    if(bx>cL||by>cW)return;
+    const nx=Math.floor(cL/bx),ny=Math.floor(cW/by);
+    const perLayer=nx*ny,total=perLayer*nz;
+    if(!total)return;
+    tryR({nx,ny,nz,total,bx,by,bz:bh,perLayer,
+      remL:cL-nx*bx,remW:cW-ny*by,remH,
+      util:total*bl*bw*bh/(cL*cW*cH)*100,
+      rotated:bx!==bl,mixed:false,strips:null});
+  };
+  mkSimple(bl,bw);
+  mkSimple(bw,bl);
+
+  if(bl===bw)return best; // square footprint — mixing won't help
+
+  // ─ Mixed W-strips ─
+  // TypeA: width=bw, perStrip=floor(cL/bl)   TypeB: width=bl, perStrip=floor(cL/bw)
+  const nA=Math.floor(cL/bl), nB=Math.floor(cL/bw);
+  {
+    const maxA=Math.floor(cW/bw);
+    for(let a=0;a<=maxA;a++){
+      const b=Math.floor((cW-a*bw)/bl);
+      if(a+b===0)continue;
+      const perLayer=a*nA+b*nB;
+      const total=perLayer*nz;
+      if(!total)continue;
+      const hasMix=a>0&&b>0;
+      const stripsArr=[];
+      if(a>0)stripsArr.push({dir:'W',count:a,sw:bw,nbox:nA,bx:bl,by:bw});
+      if(b>0)stripsArr.push({dir:'W',count:b,sw:bl,nbox:nB,bx:bw,by:bl});
+      tryR({nz,total,bz:bh,perLayer,
+        remL:0,remW:cW-(a*bw+b*bl),remH,
+        util:total*bl*bw*bh/(cL*cW*cH)*100,
+        rotated:false,mixed:hasMix,strips:hasMix?stripsArr:null,
+        nx:Math.max(nA,nB),ny:a+b,bx:bl,by:bw,
+        _wMix:{a,b,nA,nB}});
     }
   }
+
+  // ─ Mixed L-strips ─
+  // TypeC: length=bl, perStrip=floor(cW/bw)  TypeD: length=bw, perStrip=floor(cW/bl)
+  const nC=Math.floor(cW/bw), nD=Math.floor(cW/bl);
+  {
+    const maxC=Math.floor(cL/bl);
+    for(let c=0;c<=maxC;c++){
+      const d=Math.floor((cL-c*bl)/bw);
+      if(c+d===0)continue;
+      const perLayer=c*nC+d*nD;
+      const total=perLayer*nz;
+      if(!total)continue;
+      const hasMix=c>0&&d>0;
+      const stripsArr=[];
+      if(c>0)stripsArr.push({dir:'L',count:c,sl:bl,nbox:nC,bx:bl,by:bw});
+      if(d>0)stripsArr.push({dir:'L',count:d,sl:bw,nbox:nD,bx:bw,by:bl});
+      tryR({nz,total,bz:bh,perLayer,
+        remL:cL-(c*bl+d*bw),remW:0,remH,
+        util:total*bl*bw*bh/(cL*cW*cH)*100,
+        rotated:false,mixed:hasMix,strips:hasMix?stripsArr:null,
+        nx:c+d,ny:Math.max(nC,nD),bx:bl,by:bw,
+        _lMix:{c,d,nC,nD}});
+    }
+  }
+
   return best;
 }
 
-// ═══════════════════════════════════════════════════════
-// UI: unit labels
-// ═══════════════════════════════════════════════════════
-
-function syncUnit() {
+// ── UI helpers ───────────────────────────────────────────
+function syncUnit(){
   document.querySelectorAll('.ulbl').forEach(el=>el.textContent=unit);
   document.querySelectorAll('.ubtn').forEach(btn=>btn.classList.toggle('on',btn.dataset.u===unit));
 }
-
-function refreshContainerInfo() {
-  const {L,W,H}=cont;
+function refreshContainerInfo(){
+  const{L,W,H}=cont;
   const vol=(L*W*H/1e9).toFixed(3);
-  document.getElementById('c-info').textContent=
-    `容积 ${vol} m³  ·  ${fmtU(L)} × ${fmtU(W)} × ${fmtU(H)}`;
+  document.getElementById('c-info').textContent=`容积 ${vol} m³  ·  ${fmtU(L)} × ${fmtU(W)} × ${fmtU(H)}`;
 }
-
-function setContainerInputs() {
+function setContainerInputs(){
   document.getElementById('c-L').value=mmToD(cont.L);
   document.getElementById('c-W').value=mmToD(cont.W);
   document.getElementById('c-H').value=mmToD(cont.H);
 }
-
-function readContainerInputs() {
+function readContainerInputs(){
   cont.L=dToMM(document.getElementById('c-L').value);
   cont.W=dToMM(document.getElementById('c-W').value);
   cont.H=dToMM(document.getElementById('c-H').value);
 }
+function escHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
-// ═══════════════════════════════════════════════════════
-// UI: box tabs & form
-// ═══════════════════════════════════════════════════════
-
-function renderTabs() {
+// ── Box tabs & form ──────────────────────────────────────
+function renderTabs(){
   const el=document.getElementById('btabs');
   el.innerHTML='';
   boxes.forEach((b,i)=>{
     const btn=document.createElement('button');
     btn.className='btab'+(i===activeIdx?' on':'');
-    if(i===activeIdx){btn.style.background=b.color+'33';btn.style.borderColor=b.color;btn.style.color=b.color}
+    if(i===activeIdx){btn.style.background=b.color+'22';btn.style.borderColor=b.color;btn.style.color=b.color}
     btn.innerHTML=`<span class="bdot" style="background:${b.color}"></span>${escHtml(b.name)}`+
       (boxes.length>1?`<span class="bdel" data-del="${i}">×</span>`:'');
     btn.addEventListener('click',e=>{
       if(e.target.dataset.del!==undefined){
-        const di=+e.target.dataset.del;
-        boxes.splice(di,1);
+        boxes.splice(+e.target.dataset.del,1);
         activeIdx=Math.min(activeIdx,boxes.length-1);
-      } else {activeIdx=i}
+      }else{activeIdx=i}
       renderTabs();renderForm();recalc();
     });
     el.appendChild(btn);
   });
 }
 
-function renderForm() {
+function renderForm(){
   const b=boxes[activeIdx];
-  if(!b) return;
-  const el=document.getElementById('bform');
-  el.innerHTML=`
-    <div class="df" style="margin-bottom:8px">
+  if(!b)return;
+  document.getElementById('bform').innerHTML=`
+    <div class="df" style="margin-bottom:10px">
       <label>产品名称</label>
       <input type="text" id="b-name" value="${escHtml(b.name)}" placeholder="产品名称">
     </div>
@@ -276,35 +369,37 @@ function renderForm() {
       <div class="df"><label>箱子长度</label><div class="iu"><input type="number" id="b-l" min="1" step="any" value="${mmToD(b.l)}"><span class="u ulbl">${unit}</span></div></div>
       <div class="df"><label>箱子宽度</label><div class="iu"><input type="number" id="b-w" min="1" step="any" value="${mmToD(b.w)}"><span class="u ulbl">${unit}</span></div></div>
       <div class="df"><label>箱子高度 🔒</label><div class="iu"><input type="number" id="b-h" min="1" step="any" value="${mmToD(b.h)}"><span class="u ulbl">${unit}</span></div></div>
-    </div>
-  `;
+    </div>`;
   const save=()=>{
     boxes[activeIdx]={...b,
       name:document.getElementById('b-name').value.trim()||b.name,
       l:dToMM(document.getElementById('b-l').value),
       w:dToMM(document.getElementById('b-w').value),
-      h:dToMM(document.getElementById('b-h').value)
-    };
+      h:dToMM(document.getElementById('b-h').value)};
     renderTabs();recalc();
   };
-  ['b-name','b-l','b-w','b-h'].forEach(id=>{
-    document.getElementById(id).addEventListener('input',save);
-  });
+  ['b-name','b-l','b-w','b-h'].forEach(id=>document.getElementById(id).addEventListener('input',save));
 }
 
-function escHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+// ── Strip description for detail list ───────────────────
+function buildStripDesc(p){
+  if(!p.strips)return null;
+  return p.strips.map(s=>{
+    if(s.dir==='W'){
+      return `${s.count}排 × ${s.nbox}箱/排（底面 ${fmt(s.bx)}×${fmt(s.by)} ${unit}）`;
+    }else{
+      return `${s.count}列 × ${s.nbox}箱/列（底面 ${fmt(s.bx)}×${fmt(s.by)} ${unit}）`;
+    }
+  }).join(' + ');
+}
 
-// ═══════════════════════════════════════════════════════
-// Results rendering
-// ═══════════════════════════════════════════════════════
-
-function recalc() {
+// ── Results rendering ────────────────────────────────────
+function recalc(){
   readContainerInputs();
   refreshContainerInfo();
   const el=document.getElementById('results');
   if(!cont.L||!cont.W||!cont.H){el.innerHTML='';return}
 
-  // Compute pack for each box type
   const packs=boxes.map(b=>({b,p:calcPack(cont.L,cont.W,cont.H,b.l,b.w,b.h)}));
 
   if(packs.every(({p})=>!p||p.total===0)){
@@ -312,47 +407,66 @@ function recalc() {
     return;
   }
 
-  // Results HTML
   let html='';
 
-  // Comparison table if multiple boxes
+  // Comparison table
   if(boxes.length>1){
-    html+=`<div class="card"><div class="card-hd"><span class="ctitle">产品对比</span></div>
-    <table class="cmptbl"><thead><tr>
-      <th>产品</th><th>装箱量</th><th>层数</th><th>每层</th><th>利用率</th>
-    </tr></thead><tbody>`;
+    html+=`<div class="card">
+      <div class="card-hd"><span class="ctitle"><span class="ctitle-bar"></span>产品对比</span></div>
+      <div class="tbl-wrap"><table class="cmptbl"><thead><tr>
+        <th>产品</th><th>装箱量</th><th>层数</th><th>每层</th><th>利用率</th><th>方案</th>
+      </tr></thead><tbody>`;
     packs.forEach(({b,p})=>{
       if(!p)return;
       const uc=p.util>=85?'var(--teal)':p.util>=70?'var(--amber)':'var(--red)';
       html+=`<tr>
         <td><span style="display:inline-flex;align-items:center;gap:6px">
-          <span style="width:8px;height:8px;border-radius:2px;background:${b.color};display:inline-block"></span>
-          ${escHtml(b.name)}</span></td>
+          <span style="width:8px;height:8px;border-radius:2px;background:${b.color};display:inline-block;flex-shrink:0"></span>
+          <b>${escHtml(b.name)}</b></span></td>
         <td><b>${p.total.toLocaleString()}</b></td>
         <td>${p.nz}</td><td>${p.perLayer}</td>
-        <td style="color:${uc};font-weight:600">${p.util.toFixed(1)}%</td>
+        <td style="color:${uc};font-weight:800">${p.util.toFixed(1)}%</td>
+        <td>${p.mixed&&p.strips?'<span class="mix-badge">混合排列</span>':''}</td>
       </tr>`;
     });
-    html+=`</tbody></table></div>`;
+    html+=`</tbody></table></div></div>`;
   }
 
-  // Per-box detailed result + canvas
+  // Per-box detail
   packs.forEach(({b,p},idx)=>{
     if(!p||p.total===0){
       html+=`<div class="card"><div class="msg">⚠ ${escHtml(b.name)}：箱子尺寸超出集装箱，无法装载</div></div>`;
       return;
     }
     const uc=p.util>=85?'var(--teal)':p.util>=70?'var(--amber)':'var(--red)';
-    const orient=p.rotated?
-      `底面旋转90° (${fmt(p.bx)}×${fmt(p.by)} ${unit})`:
-      `原始朝向 (${fmt(p.bx)}×${fmt(p.by)} ${unit})`;
+
+    // Orient description
+    let orientText;
+    if(p.mixed&&p.strips){
+      const dir=p.strips[0].dir==='W'?'宽度方向混排':'长度方向混排';
+      orientText=`${dir} <span class="new-badge">优化</span>`;
+    }else if(p.rotated){
+      orientText=`底面旋转90° (${fmt(p.bx)}×${fmt(p.by)} ${unit})`;
+    }else{
+      orientText=`原始朝向 (${fmt(p.bx)}×${fmt(p.by)} ${unit})`;
+    }
+
+    const stripDesc=buildStripDesc(p);
+    const stripRow=stripDesc?`<li><span class="dk">排列方案</span><span class="dv" style="color:var(--blue);font-size:12px">${stripDesc}</span></li>`:'';
+
+    // Remainder display: for mixed, one axis is subdivided, show "—" for that axis
+    const showRemL=p.strips&&p.strips[0].dir==='W'?'—':fmt(p.remL)+'<small style="font-size:10px;margin-left:1px">'+unit+'</small>';
+    const showRemW=p.strips&&p.strips[0].dir==='L'?'—':fmt(p.remW)+'<small style="font-size:10px;margin-left:1px">'+unit+'</small>';
+
     html+=`
+    <div class="result-hd">
+      <span style="width:8px;height:8px;border-radius:2px;background:${b.color};display:inline-block;flex-shrink:0"></span>
+      ${escHtml(b.name)} 计算结果
+    </div>
     <div class="card">
       <div class="card-hd">
-        <span class="ctitle" style="display:flex;align-items:center;gap:7px">
-          <span style="width:10px;height:10px;border-radius:2px;background:${b.color};flex-shrink:0"></span>
-          ${escHtml(b.name)} — 计算结果
-        </span>
+        <span class="ctitle"><span class="ctitle-bar"></span>${escHtml(b.name)} — 计算结果</span>
+        ${p.mixed&&p.strips?'<span class="mix-badge">混合朝向优化</span>':''}
       </div>
       <div class="krow">
         <div class="kcard">
@@ -362,7 +476,7 @@ function recalc() {
         <div class="kcard">
           <div class="kval" style="color:var(--blue)">${p.total.toLocaleString()}</div>
           <div class="klbl">最大装箱数</div>
-          <div class="ksub">${p.nz}层 × ${p.perLayer}箱</div>
+          <div class="ksub">${p.nz}层 × ${p.perLayer}箱/层</div>
         </div>
         <div class="kcard">
           <div class="kval">${p.nz}</div>
@@ -371,254 +485,259 @@ function recalc() {
         </div>
       </div>
       <div class="rrow">
-        <div class="ritem"><div class="rval">${fmt(p.remL)} <small style="font-size:10px">${unit}</small></div><div class="rlbl">长度余量</div></div>
-        <div class="ritem"><div class="rval">${fmt(p.remW)} <small style="font-size:10px">${unit}</small></div><div class="rlbl">宽度余量</div></div>
-        <div class="ritem"><div class="rval">${fmt(p.remH)} <small style="font-size:10px">${unit}</small></div><div class="rlbl">高度余量</div></div>
+        <div class="ritem"><div class="rval">${showRemL}</div><div class="rlbl">长度余量</div></div>
+        <div class="ritem"><div class="rval">${showRemW}</div><div class="rlbl">宽度余量</div></div>
+        <div class="ritem"><div class="rval">${fmt(p.remH)}<small style="font-size:10px;margin-left:1px">${unit}</small></div><div class="rlbl">高度余量</div></div>
       </div>
       <ul class="dlist">
-        <li><span class="dk">摆放方向</span><span class="dv">${orient}</span></li>
-        <li><span class="dk">每层排列</span><span class="dv">${p.nx} 列 × ${p.ny} 行 = ${p.perLayer} 箱</span></li>
+        <li><span class="dk">摆放方向</span><span class="dv">${orientText}</span></li>
+        ${stripRow}
+        <li><span class="dk">每层排列</span><span class="dv">${p.perLayer} 箱/层</span></li>
         <li><span class="dk">箱子尺寸</span><span class="dv">${fmt(b.l)}×${fmt(b.w)}×${fmt(b.h)} ${unit}</span></li>
         <li><span class="dk">集装箱内尺</span><span class="dv">${fmt(cont.L)}×${fmt(cont.W)}×${fmt(cont.H)} ${unit}</span></li>
       </ul>
     </div>
     <div class="card">
-      <div class="card-hd"><span class="ctitle">平面布局（俯视图）</span><span style="font-size:11px;color:var(--t3)">每格代表1箱</span></div>
+      <div class="card-hd">
+        <span class="ctitle"><span class="ctitle-bar"></span>平面布局（俯视图）</span>
+        <span style="font-size:11px;color:var(--t3);font-weight:600">每格代表1箱</span>
+      </div>
       <div class="cv-wrap"><canvas id="cv2d-${idx}" height="220"></canvas></div>
+      ${p.mixed&&p.strips?`
+      <div class="cv-legend">
+        <div class="cv-leg-item">
+          <span style="width:14px;height:10px;background:${b.color}50;border:1.5px solid ${b.color}cc;border-radius:2px;display:inline-block"></span>
+          朝向A（${fmt(p.strips[0].bx)}×${fmt(p.strips[0].by)} ${unit}）
+        </div>
+        <div class="cv-leg-item">
+          <span style="width:14px;height:10px;background:${b.color}18;border:1.5px dashed ${b.color}88;border-radius:2px;display:inline-block"></span>
+          朝向B（${fmt(p.strips[1]?p.strips[1].bx:p.strips[0].bx)}×${fmt(p.strips[1]?p.strips[1].by:p.strips[0].by)} ${unit}）
+        </div>
+      </div>`:''}
     </div>
     <div class="card">
-      <div class="card-hd"><span class="ctitle">立体示意（等轴视图）</span><span style="font-size:11px;color:var(--t3)">拖拽旋转</span></div>
+      <div class="card-hd">
+        <span class="ctitle"><span class="ctitle-bar"></span>立体示意（等轴视图）</span>
+        <span style="font-size:11px;color:var(--t3);font-weight:600">拖拽旋转</span>
+      </div>
       <div class="cv-wrap"><canvas id="cviso-${idx}" height="300"></canvas></div>
     </div>`;
   });
 
   el.innerHTML=html;
 
-  // Draw canvases
   requestAnimationFrame(()=>{
     packs.forEach(({b,p},idx)=>{
-      if(!p||!p.total) return;
+      if(!p||!p.total)return;
       const cv2=document.getElementById(`cv2d-${idx}`);
-      const cvIso=document.getElementById(`cviso-${idx}`);
-      if(cv2) drawFloor(cv2,p,b);
-      if(cvIso) initIso(cvIso,p,b);
+      const cvI=document.getElementById(`cviso-${idx}`);
+      if(cv2)drawFloor(cv2,p,b);
+      if(cvI)initIso(cvI,p,b);
     });
   });
 }
 
-// ═══════════════════════════════════════════════════════
-// 2D Floor plan canvas
-// ═══════════════════════════════════════════════════════
-
-function drawFloor(cv,p,b) {
+// ── 2D Floor plan canvas ─────────────────────────────────
+function drawFloor(cv,p,b){
   const dpr=window.devicePixelRatio||1;
   const W=cv.parentElement.offsetWidth||300;
   const H=220;
-  cv.width=W*dpr; cv.height=H*dpr;
+  cv.width=W*dpr;cv.height=H*dpr;
   const ctx=cv.getContext('2d');
   ctx.scale(dpr,dpr);
 
-  const PL=28,PR=8,PT=10,PB=22;
-  const dw=W-PL-PR, dh=H-PT-PB;
-  const {nx,ny,bx,by,remL,remW}=p;
-  const cL=cont.L, cW=cont.W;
-  const sx=dw/cL, sy=dh/cW;
+  const PL=26,PR=8,PT=10,PB=22;
+  const dw=W-PL-PR,dh=H-PT-PB;
+  const cL=cont.L,cW=cont.W;
+  const sx=dw/cL,sy=dh/cW;
 
   // Background
-  ctx.fillStyle='#04090f';
-  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#f7fafc';ctx.fillRect(0,0,W,H);
 
-  // Filled box cells
   const col=b.color;
-  for(let c=0;c<nx;c++) for(let r=0;r<ny;r++){
-    const px=PL+c*bx*sx, py=PT+r*by*sy;
-    const pw=bx*sx, ph=by*sy;
-    ctx.fillStyle=col+'40';
-    ctx.fillRect(px+.5,py+.5,pw-1,ph-1);
-    ctx.strokeStyle=col+'99';
-    ctx.lineWidth=.5;
-    ctx.strokeRect(px+.5,py+.5,pw-1,ph-1);
-  }
+  const fill1=col+'50',stroke1=col+'cc';
+  const fill2=col+'18',stroke2=col+'88';
 
-  // Remainder highlight
-  ctx.setLineDash([3,3]);
-  if(remL>0&&nx>0){
-    const px=PL+nx*bx*sx;
-    ctx.fillStyle='rgba(220,60,60,.1)';
-    ctx.fillRect(px,PT,remL*sx,dh);
-    ctx.strokeStyle='rgba(220,60,60,.5)';ctx.lineWidth=.7;
-    ctx.strokeRect(px,PT,remL*sx,dh);
+  const drawBox=(px,py,pw,ph,fill,stroke,dashed)=>{
+    ctx.fillStyle=fill;ctx.fillRect(px+.5,py+.5,pw-1,ph-1);
+    if(dashed)ctx.setLineDash([2,2]);
+    ctx.strokeStyle=stroke;ctx.lineWidth=.7;
+    ctx.strokeRect(px+.5,py+.5,pw-1,ph-1);
+    if(dashed)ctx.setLineDash([]);
+  };
+
+  const drawRem=(px,py,pw,ph)=>{
+    if(pw<=0||ph<=0)return;
+    ctx.fillStyle='rgba(220,50,50,.06)';ctx.fillRect(px,py,pw,ph);
+    ctx.setLineDash([3,3]);
+    ctx.strokeStyle='rgba(220,50,50,.4)';ctx.lineWidth=.8;
+    ctx.strokeRect(px,py,pw,ph);
+    ctx.setLineDash([]);
+  };
+
+  if(p.strips){
+    const dir=p.strips[0].dir;
+    if(dir==='W'){
+      // Strips stacked along W axis
+      let wy=0;
+      p.strips.forEach((strip,si)=>{
+        const isB=si%2!==0;
+        for(let s=0;s<strip.count;s++){
+          for(let ix=0;ix<strip.nbox;ix++){
+            drawBox(PL+ix*strip.bx*sx, PT+wy*sy, strip.bx*sx, strip.by*sy,
+              isB?fill2:fill1, isB?stroke2:stroke1, isB);
+          }
+          wy+=strip.sw;
+        }
+      });
+      // W remainder
+      const usedW=p.strips.reduce((s,st)=>s+st.count*st.sw,0);
+      if(usedW<cW)drawRem(PL,PT+usedW*sy,dw,(cW-usedW)*sy);
+      // L remainder per strip type
+      p.strips.forEach((strip,si)=>{
+        const usedL=strip.nbox*strip.bx;
+        if(usedL<cL){
+          // draw subtle L remainder zone for first strip group only
+          if(si===0){
+            drawRem(PL+usedL*sx,PT,(cL-usedL)*sx,strip.count*strip.sw*sy);
+          }
+        }
+      });
+    }else{
+      // Strips stacked along L axis
+      let wx=0;
+      p.strips.forEach((strip,si)=>{
+        const isB=si%2!==0;
+        for(let s=0;s<strip.count;s++){
+          for(let iy=0;iy<strip.nbox;iy++){
+            drawBox(PL+wx*sx, PT+iy*strip.by*sy, strip.bx*sx, strip.by*sy,
+              isB?fill2:fill1, isB?stroke2:stroke1, isB);
+          }
+          wx+=strip.sl;
+        }
+      });
+      // L remainder
+      const usedL=p.strips.reduce((s,st)=>s+st.count*st.sl,0);
+      if(usedL<cL)drawRem(PL+usedL*sx,PT,(cL-usedL)*sx,dh);
+    }
+  }else{
+    // Simple grid
+    const{nx,ny,bx,by,remL,remW}=p;
+    for(let c=0;c<nx;c++) for(let r=0;r<ny;r++){
+      drawBox(PL+c*bx*sx,PT+r*by*sy,bx*sx,by*sy,fill1,stroke1,false);
+    }
+    if(remL>0&&nx>0)drawRem(PL+nx*bx*sx,PT,remL*sx,dh);
+    if(remW>0&&ny>0)drawRem(PL,PT+ny*by*sy,dw,remW*sy);
   }
-  if(remW>0&&ny>0){
-    const py=PT+ny*by*sy;
-    ctx.fillStyle='rgba(220,60,60,.1)';
-    ctx.fillRect(PL,py,dw,remW*sy);
-    ctx.strokeStyle='rgba(220,60,60,.5)';ctx.lineWidth=.7;
-    ctx.strokeRect(PL,py,dw,remW*sy);
-  }
-  ctx.setLineDash([]);
 
   // Container border
-  ctx.strokeStyle='#3a70cc';ctx.lineWidth=1.5;
+  ctx.strokeStyle='rgba(37,99,235,.55)';ctx.lineWidth=1.5;
   ctx.strokeRect(PL,PT,dw,dh);
 
-  // Column numbers
-  ctx.fillStyle='#3a5880';ctx.textAlign='center';
-  const everyC=Math.max(1,Math.ceil(nx/(dw/18)));
-  const fsC=Math.max(7,Math.min(10,Math.floor(bx*sx*.85)));
-  ctx.font=`${fsC}px sans-serif`;
-  for(let c=0;c<nx;c++){
-    if(c%everyC!==0&&c!==nx-1) continue;
-    ctx.fillText(c+1,PL+(c+.5)*bx*sx,H-5);
-  }
-
-  // Row numbers
-  ctx.textAlign='right';ctx.font='8px sans-serif';
-  const everyR=Math.max(1,Math.ceil(ny/(dh/14)));
-  for(let r=0;r<ny;r++){
-    if(r%everyR!==0&&r!==ny-1) continue;
-    ctx.fillText(r+1,PL-3,PT+(r+.5)*by*sy+3);
-  }
-
   // Axis caption
-  ctx.fillStyle='#2a4462';ctx.font='10px sans-serif';ctx.textAlign='center';
-  ctx.fillText(`长 ${fmtU(cL)} · ${nx}列 × ${ny}行`,PL+dw/2,H-1);
+  ctx.fillStyle='#8fa5be';ctx.font='600 10px sans-serif';ctx.textAlign='center';
+  ctx.fillText(`长 ${fmtU(cL)} · ${p.perLayer} 箱/层`,PL+dw/2,H-4);
 }
 
-// ═══════════════════════════════════════════════════════
-// 3D Isometric canvas
-// ═══════════════════════════════════════════════════════
-
-function proj(wx,wy,wz,rY,rX,scale,ocx,ocy) {
+// ── 3D Isometric canvas ──────────────────────────────────
+function proj(wx,wy,wz,rY,rX,scale,ocx,ocy){
   const cosY=Math.cos(rY),sinY=Math.sin(rY);
-  const x2=wx*cosY-wy*sinY;
-  const y2=wx*sinY+wy*cosY;
+  const x2=wx*cosY-wy*sinY,y2=wx*sinY+wy*cosY;
   const cosX=Math.cos(rX),sinX=Math.sin(rX);
-  const y3=y2*cosX-wz*sinX;
-  const z3=y2*sinX+wz*cosX;
-  return {sx:ocx+x2*scale, sy:ocy-z3*scale, d:y3};
+  return{sx:ocx+x2*scale,sy:ocy-(y2*sinX+wz*cosX)*scale,d:y2*cosX-wz*sinX};
 }
+function hexRgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
+function shade(rgb,f){return`rgb(${Math.round(Math.min(255,rgb[0]*f))},${Math.round(Math.min(255,rgb[1]*f))},${Math.round(Math.min(255,rgb[2]*f))})`}
 
-function hexRgb(hex){
-  return [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];
-}
-function shade(rgb,f){
-  return `rgb(${Math.round(Math.min(255,rgb[0]*f))},${Math.round(Math.min(255,rgb[1]*f))},${Math.round(Math.min(255,rgb[2]*f))})`;
-}
-
-function drawIso(cv,p,b,rY,rX) {
+function drawIso(cv,p,b,rY,rX){
   const dpr=window.devicePixelRatio||1;
-  const W=cv.parentElement.offsetWidth||300;
-  const H=300;
-  cv.width=W*dpr; cv.height=H*dpr;
+  const W=cv.parentElement.offsetWidth||300,H=300;
+  cv.width=W*dpr;cv.height=H*dpr;
   const ctx=cv.getContext('2d');
   ctx.scale(dpr,dpr);
+  ctx.fillStyle='#f0f4f8';ctx.fillRect(0,0,W,H);
 
-  ctx.fillStyle='#03080f';ctx.fillRect(0,0,W,H);
-
-  const {nx,ny,nz,bx,by,bz}=p;
+  const{nx,ny,nz,bx,by,bz}=p;
   const cL=cont.L,cW=cont.W,cH=cont.H;
-  const maxD=Math.max(cL,cW,cH);
-  const scale=Math.min(W,H)*0.38/maxD;
-  const ocx=W/2, ocy=H*0.54;
-  const PR=(wx,wy,wz)=>proj(wx-cL/2,wy-cW/2,wz-cH/2,rY,rX,scale,ocx,ocy);
+  const scale=Math.min(W,H)*0.38/Math.max(cL,cW,cH);
+  const ocx=W/2,ocy=H*0.54;
+  const PR=(wx,wy2,wz)=>proj(wx-cL/2,wy2-cW/2,wz-cH/2,rY,rX,scale,ocx,ocy);
 
-  // Container wireframe
-  const C=[[0,0,0],[cL,0,0],[0,cW,0],[cL,cW,0],[0,0,cH],[cL,0,cH],[0,cW,cH],[cL,cW,cH]];
-  const E=[[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
-  const Cp=C.map(([x,y,z])=>PR(x,y,z));
-  ctx.strokeStyle='rgba(50,100,200,.55)';ctx.lineWidth=.8;
-  E.forEach(([a,b2])=>{
-    ctx.beginPath();ctx.moveTo(Cp[a].sx,Cp[a].sy);ctx.lineTo(Cp[b2].sx,Cp[b2].sy);ctx.stroke();
-  });
+  // Wireframe
+  const CV=[[0,0,0],[cL,0,0],[0,cW,0],[cL,cW,0],[0,0,cH],[cL,0,cH],[0,cW,cH],[cL,cW,cH]];
+  const CE=[[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
+  const Cp=CV.map(([x,y,z])=>PR(x,y,z));
+  ctx.strokeStyle='rgba(37,99,235,.35)';ctx.lineWidth=.8;
+  CE.forEach(([a,b2])=>{ctx.beginPath();ctx.moveTo(Cp[a].sx,Cp[a].sy);ctx.lineTo(Cp[b2].sx,Cp[b2].sy);ctx.stroke()});
 
   const rgb=hexRgb(b.color);
-  const MAX_INDIVIDUAL=3000;
   const total=nx*ny*nz;
 
-  // Face drawing helper
-  function drawFace(pts,clr){
-    ctx.beginPath();
-    ctx.moveTo(pts[0].sx,pts[0].sy);
+  const drawFace=(pts,clr)=>{
+    ctx.beginPath();ctx.moveTo(pts[0].sx,pts[0].sy);
     pts.slice(1).forEach(pt=>ctx.lineTo(pt.sx,pt.sy));
-    ctx.closePath();
-    ctx.fillStyle=clr;ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.18)';ctx.lineWidth=.3;ctx.stroke();
-  }
+    ctx.closePath();ctx.fillStyle=clr;ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.08)';ctx.lineWidth=.3;ctx.stroke();
+  };
 
-  // Draw each box (for small counts) or layer slabs (for large)
-  if(total<=MAX_INDIVIDUAL){
-    // Collect all boxes sorted by depth
+  if(total<=1800){
     const items=[];
     for(let iz=0;iz<nz;iz++) for(let iy=0;iy<ny;iy++) for(let ix=0;ix<nx;ix++){
-      const cx2=ix*bx+bx/2,cy2=iy*by+by/2,cz2=iz*bz+bz/2;
-      const {d}=PR(cx2,cy2,cz2);
+      const{d}=PR(ix*bx+bx/2,iy*by+by/2,iz*bz+bz/2);
       items.push({ix,iy,iz,d});
     }
     items.sort((a,b2)=>a.d-b2.d);
-
     items.forEach(({ix,iy,iz})=>{
-      const wx=ix*bx,wy=iy*by,wz=iz*bz;
-      const p00=PR(wx,wy,wz),p10=PR(wx+bx,wy,wz),p01=PR(wx,wy+by,wz),p11=PR(wx+bx,wy+by,wz);
-      const p00t=PR(wx,wy,wz+bz),p10t=PR(wx+bx,wy,wz+bz),p01t=PR(wx,wy+by,wz+bz),p11t=PR(wx+bx,wy+by,wz+bz);
-      // Sort 5 visible faces by depth
+      const wx=ix*bx,wy2=iy*by,wz=iz*bz;
+      const p00=PR(wx,wy2,wz),p10=PR(wx+bx,wy2,wz),p01=PR(wx,wy2+by,wz),p11=PR(wx+bx,wy2+by,wz);
+      const p00t=PR(wx,wy2,wz+bz),p10t=PR(wx+bx,wy2,wz+bz),p01t=PR(wx,wy2+by,wz+bz),p11t=PR(wx+bx,wy2+by,wz+bz);
       const faces=[
-        {pts:[p00,p10,p11,p01],d:(p00.d+p10.d+p11.d+p01.d)/4,f:.55},  // bottom
-        {pts:[p00t,p10t,p11t,p01t],d:(p00t.d+p10t.d+p11t.d+p01t.d)/4,f:.95}, // top
-        {pts:[p00,p10,p10t,p00t],d:(p00.d+p10.d)/2,f:.65},    // front
-        {pts:[p10,p11,p11t,p10t],d:(p10.d+p11.d)/2,f:.45},    // right
-        {pts:[p00,p01,p01t,p00t],d:(p00.d+p01.d)/2,f:.7},     // left
-        {pts:[p01,p11,p11t,p01t],d:(p01.d+p11.d)/2,f:.5},     // back
-      ];
+        {pts:[p00,p10,p11,p01],f:.52},{pts:[p00t,p10t,p11t,p01t],f:.95},
+        {pts:[p00,p10,p10t,p00t],f:.65},{pts:[p10,p11,p11t,p10t],f:.42},
+        {pts:[p00,p01,p01t,p00t],f:.72},{pts:[p01,p11,p11t,p01t],f:.48},
+      ].map(fa=>({...fa,d:fa.pts.reduce((s,pt)=>s+pt.d,0)/fa.pts.length}));
       faces.sort((a,b2)=>a.d-b2.d);
       faces.forEach(({pts,f})=>drawFace(pts,shade(rgb,f)));
     });
-  } else {
-    // Layer slabs
+  }else{
     for(let iz=0;iz<nz;iz++){
-      const wz=iz*bz;
-      const t=iz/(Math.max(1,nz-1));
-      const lf=0.6+0.4*t;
-      const ex=nx*bx, ey=ny*by;
+      const wz=iz*bz,t=iz/(Math.max(1,nz-1)),lf=0.62+0.38*t;
+      const ex=nx*bx,ey=ny*by;
       const p00=PR(0,0,wz),p10=PR(ex,0,wz),p01=PR(0,ey,wz),p11=PR(ex,ey,wz);
       const p00t=PR(0,0,wz+bz),p10t=PR(ex,0,wz+bz),p01t=PR(0,ey,wz+bz),p11t=PR(ex,ey,wz+bz);
       const faces=[
-        {pts:[p00,p10,p11,p01],d:(p00.d+p10.d+p11.d+p01.d)/4,f:lf*.55},
-        {pts:[p00t,p10t,p11t,p01t],d:(p00t.d+p10t.d+p11t.d+p01t.d)/4,f:lf*.95},
-        {pts:[p00,p10,p10t,p00t],d:(p00.d+p10.d)/2,f:lf*.65},
-        {pts:[p10,p11,p11t,p10t],d:(p10.d+p11.d)/2,f:lf*.45},
-        {pts:[p00,p01,p01t,p00t],d:(p00.d+p01.d)/2,f:lf*.7},
-        {pts:[p01,p11,p11t,p01t],d:(p01.d+p11.d)/2,f:lf*.5},
-      ];
+        {pts:[p00,p10,p11,p01],f:lf*.52},{pts:[p00t,p10t,p11t,p01t],f:lf*.95},
+        {pts:[p00,p10,p10t,p00t],f:lf*.65},{pts:[p10,p11,p11t,p10t],f:lf*.42},
+        {pts:[p00,p01,p01t,p00t],f:lf*.72},{pts:[p01,p11,p11t,p01t],f:lf*.48},
+      ].map(fa=>({...fa,d:fa.pts.reduce((s,pt)=>s+pt.d,0)/fa.pts.length}));
       faces.sort((a,b2)=>a.d-b2.d);
       faces.forEach(({pts,f})=>drawFace(pts,shade(rgb,f)));
-      // Grid on top face (always draw top layer grid; for others only if few)
       if(iz===nz-1||nz<=4){
-        const tp=[p00t,p10t,p11t,p01t];
-        ctx.strokeStyle=b.color+'50';ctx.lineWidth=.4;
+        ctx.strokeStyle=b.color+'40';ctx.lineWidth=.4;
         for(let ix=0;ix<=nx;ix++){
           const t2=ix/nx;
-          const ax=p00t.sx+(p10t.sx-p00t.sx)*t2, ay=p00t.sy+(p10t.sy-p00t.sy)*t2;
-          const bx2=p01t.sx+(p11t.sx-p01t.sx)*t2, by2=p01t.sy+(p11t.sy-p01t.sy)*t2;
-          ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx2,by2);ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(p00t.sx+(p10t.sx-p00t.sx)*t2,p00t.sy+(p10t.sy-p00t.sy)*t2);
+          ctx.lineTo(p01t.sx+(p11t.sx-p01t.sx)*t2,p01t.sy+(p11t.sy-p01t.sy)*t2);
+          ctx.stroke();
         }
         for(let iy=0;iy<=ny;iy++){
           const t2=iy/ny;
-          const ax=p00t.sx+(p01t.sx-p00t.sx)*t2, ay=p00t.sy+(p01t.sy-p00t.sy)*t2;
-          const bx2=p10t.sx+(p11t.sx-p10t.sx)*t2, by2=p10t.sy+(p11t.sy-p10t.sy)*t2;
-          ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx2,by2);ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(p00t.sx+(p01t.sx-p00t.sx)*t2,p00t.sy+(p01t.sy-p00t.sy)*t2);
+          ctx.lineTo(p10t.sx+(p11t.sx-p10t.sx)*t2,p10t.sy+(p11t.sy-p10t.sy)*t2);
+          ctx.stroke();
         }
       }
     }
   }
 
-  // Caption
-  ctx.fillStyle=b.color;ctx.font='500 12px sans-serif';ctx.textAlign='center';
+  ctx.fillStyle=b.color;ctx.font='700 12px sans-serif';ctx.textAlign='center';
   ctx.fillText(`${nz}层 × ${p.perLayer}箱/层 = ${total.toLocaleString()}箱`,W/2,H-10);
 }
 
-function initIso(cv,p,b) {
-  let rotY=0.6, rotX=-0.28;
+function initIso(cv,p,b){
+  let rotY=0.62,rotX=-0.28;
   const render=()=>drawIso(cv,p,b,rotY,rotX);
   render();
   let drag=null;
@@ -626,90 +745,59 @@ function initIso(cv,p,b) {
   cv.addEventListener('mousedown',e=>{drag=getP(e)});
   cv.addEventListener('mousemove',e=>{
     if(!drag)return;
-    const [cx,cy]=getP(e);
-    rotY+=(cx-drag[0])*.007; rotX+=(cy-drag[1])*.007;
-    rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
-    drag=[cx,cy]; render();
+    const[cx,cy]=getP(e);
+    rotY+=(cx-drag[0])*.007;rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX+(cy-drag[1])*.007));
+    drag=[cx,cy];render();
   });
-  cv.addEventListener('mouseup',()=>drag=null);
-  cv.addEventListener('mouseleave',()=>drag=null);
+  ['mouseup','mouseleave'].forEach(ev=>cv.addEventListener(ev,()=>drag=null));
   cv.addEventListener('touchstart',e=>{e.preventDefault();drag=getP(e)},{passive:false});
   cv.addEventListener('touchmove',e=>{
     e.preventDefault();if(!drag)return;
-    const [cx,cy]=getP(e);
-    rotY+=(cx-drag[0])*.007; rotX+=(cy-drag[1])*.007;
-    rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
-    drag=[cx,cy]; render();
+    const[cx,cy]=getP(e);
+    rotY+=(cx-drag[0])*.007;rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX+(cy-drag[1])*.007));
+    drag=[cx,cy];render();
   },{passive:false});
   cv.addEventListener('touchend',()=>drag=null);
 }
 
-// ═══════════════════════════════════════════════════════
-// Event listeners
-// ═══════════════════════════════════════════════════════
-
-// Unit buttons
+// ── Event listeners ──────────────────────────────────────
 document.querySelectorAll('.ubtn').forEach(btn=>btn.addEventListener('click',()=>{
-  const newUnit=btn.dataset.u;
-  if(newUnit===unit) return;
+  const nu=btn.dataset.u;
+  if(nu===unit)return;
   autoCvt=document.getElementById('chk-cvt').checked;
   if(autoCvt){
-    // Convert container
-    const factor=UF[newUnit]/UF[unit];
-    ['c-L','c-W','c-H'].forEach(id=>{
+    [...['c-L','c-W','c-H'],...['b-l','b-w','b-h']].forEach(id=>{
       const el=document.getElementById(id);
-      if(el) el.value=parseFloat((parseFloat(el.value)*UF[unit]/UF[newUnit]).toFixed(UD[newUnit]));
-    });
-    ['b-l','b-w','b-h'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el) el.value=parseFloat((parseFloat(el.value)*UF[unit]/UF[newUnit]).toFixed(UD[newUnit]));
+      if(el)el.value=parseFloat((parseFloat(el.value)*UF[unit]/UF[nu]).toFixed(UD[nu]));
     });
   }
-  unit=newUnit;
-  syncUnit();
-  readContainerInputs();
-  recalc();
+  unit=nu;syncUnit();readContainerInputs();recalc();
 }));
 
 document.getElementById('chk-cvt').addEventListener('change',e=>{autoCvt=e.target.checked});
 
-// Container preset
 document.getElementById('sel-preset').addEventListener('change',e=>{
-  const v=e.target.value;
-  if(!v) return;
-  const pr=PRESETS[v];
+  const pr=PRESETS[e.target.value];
+  if(!pr)return;
   cont={L:pr.L,W:pr.W,H:pr.H};
-  setContainerInputs();
-  refreshContainerInfo();
-  recalc();
+  setContainerInputs();refreshContainerInfo();recalc();
 });
 
-// Container inputs
 ['c-L','c-W','c-H'].forEach(id=>{
   document.getElementById(id).addEventListener('input',()=>{readContainerInputs();refreshContainerInfo();recalc()});
 });
 
-// Add box
 document.getElementById('btn-add').addEventListener('click',()=>{
-  const ci=COLORS[boxes.length%COLORS.length];
-  boxes.push({id:nextId++,name:`产品${boxes.length>0?String.fromCharCode(65+boxes.length):'A'}`,
-    l:400,w:300,h:350,color:ci});
+  boxes.push({id:nextId++,name:`产品${String.fromCharCode(65+boxes.length)}`,
+    l:400,w:300,h:350,color:COLORS[boxes.length%COLORS.length]});
   activeIdx=boxes.length-1;
   renderTabs();renderForm();recalc();
 });
 
-// Resize handler - redraw canvases
 window.addEventListener('resize',()=>recalc());
 
-// ═══════════════════════════════════════════════════════
-// Init
-// ═══════════════════════════════════════════════════════
-
-syncUnit();
-renderTabs();
-renderForm();
-refreshContainerInfo();
-recalc();
+// ── Init ─────────────────────────────────────────────────
+syncUnit();renderTabs();renderForm();refreshContainerInfo();recalc();
 </script>
 </body>
 </html>
