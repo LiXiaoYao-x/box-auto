@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>集装箱装载优化</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#03080f;--bg1:#070f1e;--bg2:#0b1526;--bg3:#0f1d32;
+  --bd:#152032;--bd2:#1c2e45;--bd3:#243a55;
+  --t1:#c4d8f0;--t2:#557898;--t3:#2a4460;
+  --blue:#2a6fd4;--blue2:#1a4898;--teal:#18b09e;
+  --amber:#dda020;--red:#d84040;--green:#28a860;
+  --r:10px;
+}
+body{background:var(--bg0);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;min-height:100vh;padding-bottom:48px}
+#app{max-width:660px;margin:0 auto;padding:0 14px}
+/* Header */
+.hd{padding:18px 0 16px;border-bottom:1px solid var(--bd)}
+.hd h1{font-size:20px;font-weight:700;color:var(--blue);letter-spacing:-.3px}
+.hd p{font-size:11px;color:var(--t3);margin-top:4px}
+/* Unit bar */
+.ubar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.ubar span{font-size:12px;color:var(--t2)}
+.ubtn-g{display:flex;border:1px solid var(--bd2);border-radius:6px;overflow:hidden}
+.ubtn{padding:5px 14px;background:transparent;border:none;color:var(--t2);font-size:13px;cursor:pointer;transition:.15s}
+.ubtn.on{background:var(--blue2);color:#fff}
+.ubtn:not(.on):active{background:var(--bg3)}
+.cvt-lbl{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none}
+.cvt-lbl input{cursor:pointer;accent-color:var(--blue);width:13px;height:13px}
+/* Card */
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-top:12px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.ctitle{font-size:13px;font-weight:600;color:var(--blue)}
+select{background:var(--bg3);border:1px solid var(--bd2);border-radius:6px;color:var(--t1);font-size:12px;padding:5px 8px;cursor:pointer;outline:none}
+/* Form grid */
+.drow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.drow.four{grid-template-columns:repeat(4,1fr)}
+.df label{font-size:11px;color:var(--t2);display:block;margin-bottom:4px}
+.iu{display:flex}
+.iu input{flex:1;background:var(--bg1);border:1px solid var(--bd2);border-right:none;border-radius:6px 0 0 6px;color:var(--t1);font-size:13px;padding:7px 7px;outline:none;min-width:0;transition:.15s}
+.iu input:focus{border-color:var(--blue)}
+.iu .u{background:var(--bg3);border:1px solid var(--bd2);border-radius:0 6px 6px 0;color:var(--t2);font-size:11px;padding:7px 6px;white-space:nowrap}
+input[type=text]{background:var(--bg1);border:1px solid var(--bd2);border-radius:6px;color:var(--t1);font-size:13px;padding:7px 10px;outline:none;transition:.15s;width:100%}
+input[type=text]:focus{border-color:var(--blue)}
+/* Box tabs */
+.btabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.btab{padding:4px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--t2);display:flex;align-items:center;gap:5px;transition:.15s}
+.btab.on{color:#fff}
+.bdot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.bdel{color:#d05050;font-size:15px;line-height:1;margin-left:1px}
+/* Note */
+.vnote{background:var(--bg3);border:1px solid var(--bd2);border-left:3px solid var(--amber);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--t2);margin-top:12px}
+/* KPI */
+.krow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.kcard{background:var(--bg1);border:1px solid var(--bd);border-radius:8px;padding:12px 8px;text-align:center}
+.kval{font-size:22px;font-weight:700;line-height:1}
+.klbl{font-size:11px;color:var(--t2);margin-top:5px}
+.ksub{font-size:11px;color:var(--t3);margin-top:3px}
+/* Remainder row */
+.rrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.ritem{background:var(--bg1);border-radius:6px;padding:7px;text-align:center;border:1px solid var(--bd)}
+.rval{font-size:14px;font-weight:600;color:var(--amber)}
+.rlbl{font-size:10px;color:var(--t3);margin-top:2px}
+/* Detail */
+.dlist{list-style:none}
+.dlist li{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.dlist li:last-child{border-bottom:none}
+.dk{color:var(--t2)}.dv{font-weight:500}
+/* Btn */
+.addbtn{background:transparent;border:1px dashed var(--bd2);color:var(--t3);border-radius:6px;padding:7px 12px;font-size:12px;cursor:pointer;transition:.15s;width:100%;margin-top:2px}
+.addbtn:hover{border-color:var(--blue);color:var(--blue)}
+/* Canvas */
+canvas{display:block;width:100%}
+.cv-wrap{position:relative;border-radius:8px;overflow:hidden;cursor:grab}
+.cv-wrap:active{cursor:grabbing}
+/* Compare table */
+.cmptbl{width:100%;border-collapse:collapse;font-size:13px}
+.cmptbl th{background:var(--bg1);color:var(--t2);font-weight:500;padding:8px 10px;text-align:left;border-bottom:1px solid var(--bd)}
+.cmptbl td{padding:8px 10px;border-bottom:1px solid var(--bd)}
+.cmptbl tr:last-child td{border-bottom:none}
+/* Msg */
+.msg{text-align:center;color:var(--t3);padding:24px;font-size:13px}
+/* Loading */
+.loading{text-align:center;color:var(--t2);padding:20px;font-size:13px}
+/* Info bar */
+.ibar{font-size:11px;color:var(--t3);margin-top:6px;text-align:right}
+@media(max-width:420px){
+  .drow{grid-template-columns:repeat(3,1fr)}
+  .krow{grid-template-columns:repeat(3,1fr)}
+  .kval{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Header -->
+  <div class="hd">
+    <h1>集装箱装载优化</h1>
+    <p>垂直摆放约束 · 自动计算最大装箱数 · 平面 &amp; 立体可视化</p>
+    <div class="ubar">
+      <span>单位:</span>
+      <div class="ubtn-g">
+        <button class="ubtn" data-u="mm">mm</button>
+        <button class="ubtn on" data-u="cm">cm</button>
+        <button class="ubtn" data-u="m">m</button>
+      </div>
+      <label class="cvt-lbl">
+        <input type="checkbox" id="chk-cvt" checked>
+        切换时自动换算数值
+      </label>
+    </div>
+  </div>
+
+  <!-- Container dims -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="ctitle">集装箱内部尺寸</span>
+      <select id="sel-preset">
+        <option value="">自定义</option>
+        <option value="20std">20尺标准柜 (5898×2352×2393 mm)</option>
+        <option value="40std">40尺标准柜 (12032×2352×2393 mm)</option>
+        <option value="40hc">40尺高柜 (12032×2352×2698 mm)</option>
+        <option value="45hc">45尺高柜 (13556×2352×2698 mm)</option>
+      </select>
+    </div>
+    <div class="drow">
+      <div class="df"><label>内部长度</label><div class="iu"><input type="number" id="c-L" min="1" step="any" value="590"><span class="u ulbl">cm</span></div></div>
+      <div class="df"><label>内部宽度</label><div class="iu"><input type="number" id="c-W" min="1" step="any" value="235"><span class="u ulbl">cm</span></div></div>
+      <div class="df"><label>内部高度</label><div class="iu"><input type="number" id="c-H" min="1" step="any" value="239"><span class="u ulbl">cm</span></div></div>
+    </div>
+    <div class="ibar" id="c-info"></div>
+  </div>
+
+  <!-- Box types -->
+  <div class="card">
+    <div class="card-hd">
+      <span class="ctitle">产品箱子规格</span>
+      <button class="addbtn" id="btn-add" style="width:auto;padding:5px 12px;margin:0">＋ 添加产品</button>
+    </div>
+    <div class="btabs" id="btabs"></div>
+    <div id="bform"></div>
+    <div class="vnote">⚠ 液体产品垂直摆放，高度方向锁定不可翻转。底面朝向自动尝试旋转 90° 以最大化利用率。</div>
+  </div>
+
+  <!-- Results -->
+  <div id="results"></div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// Constants & State
+// ═══════════════════════════════════════════════════════
+
+const UF = { mm:1, cm:10, m:1000 };
+const UD = { mm:0, cm:1, m:3 };
+const COLORS = ['#3a80e0','#e8762a','#18b09e','#c040b8','#d8c020','#28a860','#d84060','#7050e0'];
+const PRESETS = {
+  '20std':{L:5898,W:2352,H:2393},
+  '40std':{L:12032,W:2352,H:2393},
+  '40hc': {L:12032,W:2352,H:2698},
+  '45hc': {L:13556,W:2352,H:2698},
+};
+
+let unit = 'cm';
+let autoCvt = true;
+let cont = {L:5900,W:2350,H:2390}; // internal mm
+let boxes = [{id:1,name:'产品A',l:400,w:300,h:350,color:COLORS[0]}];
+let activeIdx = 0;
+let nextId = 2;
+let isoRot = {y:0.6, x:-0.3};
+let isoDrag = null;
+
+// ═══════════════════════════════════════════════════════
+// Unit helpers
+// ═══════════════════════════════════════════════════════
+
+const mmToD = mm => {
+  const v = mm / UF[unit];
+  const d = UD[unit];
+  return d===0 ? Math.round(v) : parseFloat(v.toFixed(d));
+};
+const dToMM = v => (parseFloat(v)||0) * UF[unit];
+const fmt = mm => mmToD(mm).toString();
+const fmtU = mm => fmt(mm) + ' ' + unit;
+
+// ═══════════════════════════════════════════════════════
+// Packing algorithm (vertical only)
+// ═══════════════════════════════════════════════════════
+
+function calcPack(cL,cW,cH,bl,bw,bh) {
+  if(!cL||!cW||!cH||!bl||!bw||!bh) return null;
+  if(bh>cH) return null;
+  let best = null;
+  for(const [bx,by] of [[bl,bw],[bw,bl]]) {
+    if(bx>cL||by>cW) continue;
+    const nx=Math.floor(cL/bx), ny=Math.floor(cW/by), nz=Math.floor(cH/bh);
+    const total=nx*ny*nz;
+    if(!best||total>best.total) {
+      best={nx,ny,nz,total,bx,by,bz:bh,
+        perLayer:nx*ny,
+        remL:cL-nx*bx, remW:cW-ny*by, remH:cH-nz*bh,
+        util:total?(nx*bx*ny*by*nz*bh)/(cL*cW*cH)*100:0,
+        rotated:bx!==bl};
+    }
+  }
+  return best;
+}
+
+// ═══════════════════════════════════════════════════════
+// UI: unit labels
+// ═══════════════════════════════════════════════════════
+
+function syncUnit() {
+  document.querySelectorAll('.ulbl').forEach(el=>el.textContent=unit);
+  document.querySelectorAll('.ubtn').forEach(btn=>btn.classList.toggle('on',btn.dataset.u===unit));
+}
+
+function refreshContainerInfo() {
+  const {L,W,H}=cont;
+  const vol=(L*W*H/1e9).toFixed(3);
+  document.getElementById('c-info').textContent=
+    `容积 ${vol} m³  ·  ${fmtU(L)} × ${fmtU(W)} × ${fmtU(H)}`;
+}
+
+function setContainerInputs() {
+  document.getElementById('c-L').value=mmToD(cont.L);
+  document.getElementById('c-W').value=mmToD(cont.W);
+  document.getElementById('c-H').value=mmToD(cont.H);
+}
+
+function readContainerInputs() {
+  cont.L=dToMM(document.getElementById('c-L').value);
+  cont.W=dToMM(document.getElementById('c-W').value);
+  cont.H=dToMM(document.getElementById('c-H').value);
+}
+
+// ═══════════════════════════════════════════════════════
+// UI: box tabs & form
+// ═══════════════════════════════════════════════════════
+
+function renderTabs() {
+  const el=document.getElementById('btabs');
+  el.innerHTML='';
+  boxes.forEach((b,i)=>{
+    const btn=document.createElement('button');
+    btn.className='btab'+(i===activeIdx?' on':'');
+    if(i===activeIdx){btn.style.background=b.color+'33';btn.style.borderColor=b.color;btn.style.color=b.color}
+    btn.innerHTML=`<span class="bdot" style="background:${b.color}"></span>${escHtml(b.name)}`+
+      (boxes.length>1?`<span class="bdel" data-del="${i}">×</span>`:'');
+    btn.addEventListener('click',e=>{
+      if(e.target.dataset.del!==undefined){
+        const di=+e.target.dataset.del;
+        boxes.splice(di,1);
+        activeIdx=Math.min(activeIdx,boxes.length-1);
+      } else {activeIdx=i}
+      renderTabs();renderForm();recalc();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function renderForm() {
+  const b=boxes[activeIdx];
+  if(!b) return;
+  const el=document.getElementById('bform');
+  el.innerHTML=`
+    <div class="df" style="margin-bottom:8px">
+      <label>产品名称</label>
+      <input type="text" id="b-name" value="${escHtml(b.name)}" placeholder="产品名称">
+    </div>
+    <div class="drow">
+      <div class="df"><label>箱子长度</label><div class="iu"><input type="number" id="b-l" min="1" step="any" value="${mmToD(b.l)}"><span class="u ulbl">${unit}</span></div></div>
+      <div class="df"><label>箱子宽度</label><div class="iu"><input type="number" id="b-w" min="1" step="any" value="${mmToD(b.w)}"><span class="u ulbl">${unit}</span></div></div>
+      <div class="df"><label>箱子高度 🔒</label><div class="iu"><input type="number" id="b-h" min="1" step="any" value="${mmToD(b.h)}"><span class="u ulbl">${unit}</span></div></div>
+    </div>
+  `;
+  const save=()=>{
+    boxes[activeIdx]={...b,
+      name:document.getElementById('b-name').value.trim()||b.name,
+      l:dToMM(document.getElementById('b-l').value),
+      w:dToMM(document.getElementById('b-w').value),
+      h:dToMM(document.getElementById('b-h').value)
+    };
+    renderTabs();recalc();
+  };
+  ['b-name','b-l','b-w','b-h'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',save);
+  });
+}
+
+function escHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+// ═══════════════════════════════════════════════════════
+// Results rendering
+// ═══════════════════════════════════════════════════════
+
+function recalc() {
+  readContainerInputs();
+  refreshContainerInfo();
+  const el=document.getElementById('results');
+  if(!cont.L||!cont.W||!cont.H){el.innerHTML='';return}
+
+  // Compute pack for each box type
+  const packs=boxes.map(b=>({b,p:calcPack(cont.L,cont.W,cont.H,b.l,b.w,b.h)}));
+
+  if(packs.every(({p})=>!p||p.total===0)){
+    el.innerHTML=`<div class="card"><div class="msg">📦 无法装载：请检查箱子尺寸是否超出集装箱</div></div>`;
+    return;
+  }
+
+  // Results HTML
+  let html='';
+
+  // Comparison table if multiple boxes
+  if(boxes.length>1){
+    html+=`<div class="card"><div class="card-hd"><span class="ctitle">产品对比</span></div>
+    <table class="cmptbl"><thead><tr>
+      <th>产品</th><th>装箱量</th><th>层数</th><th>每层</th><th>利用率</th>
+    </tr></thead><tbody>`;
+    packs.forEach(({b,p})=>{
+      if(!p)return;
+      const uc=p.util>=85?'var(--teal)':p.util>=70?'var(--amber)':'var(--red)';
+      html+=`<tr>
+        <td><span style="display:inline-flex;align-items:center;gap:6px">
+          <span style="width:8px;height:8px;border-radius:2px;background:${b.color};display:inline-block"></span>
+          ${escHtml(b.name)}</span></td>
+        <td><b>${p.total.toLocaleString()}</b></td>
+        <td>${p.nz}</td><td>${p.perLayer}</td>
+        <td style="color:${uc};font-weight:600">${p.util.toFixed(1)}%</td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  }
+
+  // Per-box detailed result + canvas
+  packs.forEach(({b,p},idx)=>{
+    if(!p||p.total===0){
+      html+=`<div class="card"><div class="msg">⚠ ${escHtml(b.name)}：箱子尺寸超出集装箱，无法装载</div></div>`;
+      return;
+    }
+    const uc=p.util>=85?'var(--teal)':p.util>=70?'var(--amber)':'var(--red)';
+    const orient=p.rotated?
+      `底面旋转90° (${fmt(p.bx)}×${fmt(p.by)} ${unit})`:
+      `原始朝向 (${fmt(p.bx)}×${fmt(p.by)} ${unit})`;
+    html+=`
+    <div class="card">
+      <div class="card-hd">
+        <span class="ctitle" style="display:flex;align-items:center;gap:7px">
+          <span style="width:10px;height:10px;border-radius:2px;background:${b.color};flex-shrink:0"></span>
+          ${escHtml(b.name)} — 计算结果
+        </span>
+      </div>
+      <div class="krow">
+        <div class="kcard">
+          <div class="kval" style="color:${uc}">${p.util.toFixed(1)}%</div>
+          <div class="klbl">空间利用率</div>
+        </div>
+        <div class="kcard">
+          <div class="kval" style="color:var(--blue)">${p.total.toLocaleString()}</div>
+          <div class="klbl">最大装箱数</div>
+          <div class="ksub">${p.nz}层 × ${p.perLayer}箱</div>
+        </div>
+        <div class="kcard">
+          <div class="kval">${p.nz}</div>
+          <div class="klbl">层数</div>
+          <div class="ksub">${fmt(p.bz)} ${unit}/层</div>
+        </div>
+      </div>
+      <div class="rrow">
+        <div class="ritem"><div class="rval">${fmt(p.remL)} <small style="font-size:10px">${unit}</small></div><div class="rlbl">长度余量</div></div>
+        <div class="ritem"><div class="rval">${fmt(p.remW)} <small style="font-size:10px">${unit}</small></div><div class="rlbl">宽度余量</div></div>
+        <div class="ritem"><div class="rval">${fmt(p.remH)} <small style="font-size:10px">${unit}</small></div><div class="rlbl">高度余量</div></div>
+      </div>
+      <ul class="dlist">
+        <li><span class="dk">摆放方向</span><span class="dv">${orient}</span></li>
+        <li><span class="dk">每层排列</span><span class="dv">${p.nx} 列 × ${p.ny} 行 = ${p.perLayer} 箱</span></li>
+        <li><span class="dk">箱子尺寸</span><span class="dv">${fmt(b.l)}×${fmt(b.w)}×${fmt(b.h)} ${unit}</span></li>
+        <li><span class="dk">集装箱内尺</span><span class="dv">${fmt(cont.L)}×${fmt(cont.W)}×${fmt(cont.H)} ${unit}</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ctitle">平面布局（俯视图）</span><span style="font-size:11px;color:var(--t3)">每格代表1箱</span></div>
+      <div class="cv-wrap"><canvas id="cv2d-${idx}" height="220"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ctitle">立体示意（等轴视图）</span><span style="font-size:11px;color:var(--t3)">拖拽旋转</span></div>
+      <div class="cv-wrap"><canvas id="cviso-${idx}" height="300"></canvas></div>
+    </div>`;
+  });
+
+  el.innerHTML=html;
+
+  // Draw canvases
+  requestAnimationFrame(()=>{
+    packs.forEach(({b,p},idx)=>{
+      if(!p||!p.total) return;
+      const cv2=document.getElementById(`cv2d-${idx}`);
+      const cvIso=document.getElementById(`cviso-${idx}`);
+      if(cv2) drawFloor(cv2,p,b);
+      if(cvIso) initIso(cvIso,p,b);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// 2D Floor plan canvas
+// ═══════════════════════════════════════════════════════
+
+function drawFloor(cv,p,b) {
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.parentElement.offsetWidth||300;
+  const H=220;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  const PL=28,PR=8,PT=10,PB=22;
+  const dw=W-PL-PR, dh=H-PT-PB;
+  const {nx,ny,bx,by,remL,remW}=p;
+  const cL=cont.L, cW=cont.W;
+  const sx=dw/cL, sy=dh/cW;
+
+  // Background
+  ctx.fillStyle='#04090f';
+  ctx.fillRect(0,0,W,H);
+
+  // Filled box cells
+  const col=b.color;
+  for(let c=0;c<nx;c++) for(let r=0;r<ny;r++){
+    const px=PL+c*bx*sx, py=PT+r*by*sy;
+    const pw=bx*sx, ph=by*sy;
+    ctx.fillStyle=col+'40';
+    ctx.fillRect(px+.5,py+.5,pw-1,ph-1);
+    ctx.strokeStyle=col+'99';
+    ctx.lineWidth=.5;
+    ctx.strokeRect(px+.5,py+.5,pw-1,ph-1);
+  }
+
+  // Remainder highlight
+  ctx.setLineDash([3,3]);
+  if(remL>0&&nx>0){
+    const px=PL+nx*bx*sx;
+    ctx.fillStyle='rgba(220,60,60,.1)';
+    ctx.fillRect(px,PT,remL*sx,dh);
+    ctx.strokeStyle='rgba(220,60,60,.5)';ctx.lineWidth=.7;
+    ctx.strokeRect(px,PT,remL*sx,dh);
+  }
+  if(remW>0&&ny>0){
+    const py=PT+ny*by*sy;
+    ctx.fillStyle='rgba(220,60,60,.1)';
+    ctx.fillRect(PL,py,dw,remW*sy);
+    ctx.strokeStyle='rgba(220,60,60,.5)';ctx.lineWidth=.7;
+    ctx.strokeRect(PL,py,dw,remW*sy);
+  }
+  ctx.setLineDash([]);
+
+  // Container border
+  ctx.strokeStyle='#3a70cc';ctx.lineWidth=1.5;
+  ctx.strokeRect(PL,PT,dw,dh);
+
+  // Column numbers
+  ctx.fillStyle='#3a5880';ctx.textAlign='center';
+  const everyC=Math.max(1,Math.ceil(nx/(dw/18)));
+  const fsC=Math.max(7,Math.min(10,Math.floor(bx*sx*.85)));
+  ctx.font=`${fsC}px sans-serif`;
+  for(let c=0;c<nx;c++){
+    if(c%everyC!==0&&c!==nx-1) continue;
+    ctx.fillText(c+1,PL+(c+.5)*bx*sx,H-5);
+  }
+
+  // Row numbers
+  ctx.textAlign='right';ctx.font='8px sans-serif';
+  const everyR=Math.max(1,Math.ceil(ny/(dh/14)));
+  for(let r=0;r<ny;r++){
+    if(r%everyR!==0&&r!==ny-1) continue;
+    ctx.fillText(r+1,PL-3,PT+(r+.5)*by*sy+3);
+  }
+
+  // Axis caption
+  ctx.fillStyle='#2a4462';ctx.font='10px sans-serif';ctx.textAlign='center';
+  ctx.fillText(`长 ${fmtU(cL)} · ${nx}列 × ${ny}行`,PL+dw/2,H-1);
+}
+
+// ═══════════════════════════════════════════════════════
+// 3D Isometric canvas
+// ═══════════════════════════════════════════════════════
+
+function proj(wx,wy,wz,rY,rX,scale,ocx,ocy) {
+  const cosY=Math.cos(rY),sinY=Math.sin(rY);
+  const x2=wx*cosY-wy*sinY;
+  const y2=wx*sinY+wy*cosY;
+  const cosX=Math.cos(rX),sinX=Math.sin(rX);
+  const y3=y2*cosX-wz*sinX;
+  const z3=y2*sinX+wz*cosX;
+  return {sx:ocx+x2*scale, sy:ocy-z3*scale, d:y3};
+}
+
+function hexRgb(hex){
+  return [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)];
+}
+function shade(rgb,f){
+  return `rgb(${Math.round(Math.min(255,rgb[0]*f))},${Math.round(Math.min(255,rgb[1]*f))},${Math.round(Math.min(255,rgb[2]*f))})`;
+}
+
+function drawIso(cv,p,b,rY,rX) {
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.parentElement.offsetWidth||300;
+  const H=300;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  ctx.fillStyle='#03080f';ctx.fillRect(0,0,W,H);
+
+  const {nx,ny,nz,bx,by,bz}=p;
+  const cL=cont.L,cW=cont.W,cH=cont.H;
+  const maxD=Math.max(cL,cW,cH);
+  const scale=Math.min(W,H)*0.38/maxD;
+  const ocx=W/2, ocy=H*0.54;
+  const PR=(wx,wy,wz)=>proj(wx-cL/2,wy-cW/2,wz-cH/2,rY,rX,scale,ocx,ocy);
+
+  // Container wireframe
+  const C=[[0,0,0],[cL,0,0],[0,cW,0],[cL,cW,0],[0,0,cH],[cL,0,cH],[0,cW,cH],[cL,cW,cH]];
+  const E=[[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
+  const Cp=C.map(([x,y,z])=>PR(x,y,z));
+  ctx.strokeStyle='rgba(50,100,200,.55)';ctx.lineWidth=.8;
+  E.forEach(([a,b2])=>{
+    ctx.beginPath();ctx.moveTo(Cp[a].sx,Cp[a].sy);ctx.lineTo(Cp[b2].sx,Cp[b2].sy);ctx.stroke();
+  });
+
+  const rgb=hexRgb(b.color);
+  const MAX_INDIVIDUAL=3000;
+  const total=nx*ny*nz;
+
+  // Face drawing helper
+  function drawFace(pts,clr){
+    ctx.beginPath();
+    ctx.moveTo(pts[0].sx,pts[0].sy);
+    pts.slice(1).forEach(pt=>ctx.lineTo(pt.sx,pt.sy));
+    ctx.closePath();
+    ctx.fillStyle=clr;ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.18)';ctx.lineWidth=.3;ctx.stroke();
+  }
+
+  // Draw each box (for small counts) or layer slabs (for large)
+  if(total<=MAX_INDIVIDUAL){
+    // Collect all boxes sorted by depth
+    const items=[];
+    for(let iz=0;iz<nz;iz++) for(let iy=0;iy<ny;iy++) for(let ix=0;ix<nx;ix++){
+      const cx2=ix*bx+bx/2,cy2=iy*by+by/2,cz2=iz*bz+bz/2;
+      const {d}=PR(cx2,cy2,cz2);
+      items.push({ix,iy,iz,d});
+    }
+    items.sort((a,b2)=>a.d-b2.d);
+
+    items.forEach(({ix,iy,iz})=>{
+      const wx=ix*bx,wy=iy*by,wz=iz*bz;
+      const p00=PR(wx,wy,wz),p10=PR(wx+bx,wy,wz),p01=PR(wx,wy+by,wz),p11=PR(wx+bx,wy+by,wz);
+      const p00t=PR(wx,wy,wz+bz),p10t=PR(wx+bx,wy,wz+bz),p01t=PR(wx,wy+by,wz+bz),p11t=PR(wx+bx,wy+by,wz+bz);
+      // Sort 5 visible faces by depth
+      const faces=[
+        {pts:[p00,p10,p11,p01],d:(p00.d+p10.d+p11.d+p01.d)/4,f:.55},  // bottom
+        {pts:[p00t,p10t,p11t,p01t],d:(p00t.d+p10t.d+p11t.d+p01t.d)/4,f:.95}, // top
+        {pts:[p00,p10,p10t,p00t],d:(p00.d+p10.d)/2,f:.65},    // front
+        {pts:[p10,p11,p11t,p10t],d:(p10.d+p11.d)/2,f:.45},    // right
+        {pts:[p00,p01,p01t,p00t],d:(p00.d+p01.d)/2,f:.7},     // left
+        {pts:[p01,p11,p11t,p01t],d:(p01.d+p11.d)/2,f:.5},     // back
+      ];
+      faces.sort((a,b2)=>a.d-b2.d);
+      faces.forEach(({pts,f})=>drawFace(pts,shade(rgb,f)));
+    });
+  } else {
+    // Layer slabs
+    for(let iz=0;iz<nz;iz++){
+      const wz=iz*bz;
+      const t=iz/(Math.max(1,nz-1));
+      const lf=0.6+0.4*t;
+      const ex=nx*bx, ey=ny*by;
+      const p00=PR(0,0,wz),p10=PR(ex,0,wz),p01=PR(0,ey,wz),p11=PR(ex,ey,wz);
+      const p00t=PR(0,0,wz+bz),p10t=PR(ex,0,wz+bz),p01t=PR(0,ey,wz+bz),p11t=PR(ex,ey,wz+bz);
+      const faces=[
+        {pts:[p00,p10,p11,p01],d:(p00.d+p10.d+p11.d+p01.d)/4,f:lf*.55},
+        {pts:[p00t,p10t,p11t,p01t],d:(p00t.d+p10t.d+p11t.d+p01t.d)/4,f:lf*.95},
+        {pts:[p00,p10,p10t,p00t],d:(p00.d+p10.d)/2,f:lf*.65},
+        {pts:[p10,p11,p11t,p10t],d:(p10.d+p11.d)/2,f:lf*.45},
+        {pts:[p00,p01,p01t,p00t],d:(p00.d+p01.d)/2,f:lf*.7},
+        {pts:[p01,p11,p11t,p01t],d:(p01.d+p11.d)/2,f:lf*.5},
+      ];
+      faces.sort((a,b2)=>a.d-b2.d);
+      faces.forEach(({pts,f})=>drawFace(pts,shade(rgb,f)));
+      // Grid on top face (always draw top layer grid; for others only if few)
+      if(iz===nz-1||nz<=4){
+        const tp=[p00t,p10t,p11t,p01t];
+        ctx.strokeStyle=b.color+'50';ctx.lineWidth=.4;
+        for(let ix=0;ix<=nx;ix++){
+          const t2=ix/nx;
+          const ax=p00t.sx+(p10t.sx-p00t.sx)*t2, ay=p00t.sy+(p10t.sy-p00t.sy)*t2;
+          const bx2=p01t.sx+(p11t.sx-p01t.sx)*t2, by2=p01t.sy+(p11t.sy-p01t.sy)*t2;
+          ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx2,by2);ctx.stroke();
+        }
+        for(let iy=0;iy<=ny;iy++){
+          const t2=iy/ny;
+          const ax=p00t.sx+(p01t.sx-p00t.sx)*t2, ay=p00t.sy+(p01t.sy-p00t.sy)*t2;
+          const bx2=p10t.sx+(p11t.sx-p10t.sx)*t2, by2=p10t.sy+(p11t.sy-p10t.sy)*t2;
+          ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx2,by2);ctx.stroke();
+        }
+      }
+    }
+  }
+
+  // Caption
+  ctx.fillStyle=b.color;ctx.font='500 12px sans-serif';ctx.textAlign='center';
+  ctx.fillText(`${nz}层 × ${p.perLayer}箱/层 = ${total.toLocaleString()}箱`,W/2,H-10);
+}
+
+function initIso(cv,p,b) {
+  let rotY=0.6, rotX=-0.28;
+  const render=()=>drawIso(cv,p,b,rotY,rotX);
+  render();
+  let drag=null;
+  const getP=e=>e.touches?[e.touches[0].clientX,e.touches[0].clientY]:[e.clientX,e.clientY];
+  cv.addEventListener('mousedown',e=>{drag=getP(e)});
+  cv.addEventListener('mousemove',e=>{
+    if(!drag)return;
+    const [cx,cy]=getP(e);
+    rotY+=(cx-drag[0])*.007; rotX+=(cy-drag[1])*.007;
+    rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
+    drag=[cx,cy]; render();
+  });
+  cv.addEventListener('mouseup',()=>drag=null);
+  cv.addEventListener('mouseleave',()=>drag=null);
+  cv.addEventListener('touchstart',e=>{e.preventDefault();drag=getP(e)},{passive:false});
+  cv.addEventListener('touchmove',e=>{
+    e.preventDefault();if(!drag)return;
+    const [cx,cy]=getP(e);
+    rotY+=(cx-drag[0])*.007; rotX+=(cy-drag[1])*.007;
+    rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
+    drag=[cx,cy]; render();
+  },{passive:false});
+  cv.addEventListener('touchend',()=>drag=null);
+}
+
+// ═══════════════════════════════════════════════════════
+// Event listeners
+// ═══════════════════════════════════════════════════════
+
+// Unit buttons
+document.querySelectorAll('.ubtn').forEach(btn=>btn.addEventListener('click',()=>{
+  const newUnit=btn.dataset.u;
+  if(newUnit===unit) return;
+  autoCvt=document.getElementById('chk-cvt').checked;
+  if(autoCvt){
+    // Convert container
+    const factor=UF[newUnit]/UF[unit];
+    ['c-L','c-W','c-H'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value=parseFloat((parseFloat(el.value)*UF[unit]/UF[newUnit]).toFixed(UD[newUnit]));
+    });
+    ['b-l','b-w','b-h'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value=parseFloat((parseFloat(el.value)*UF[unit]/UF[newUnit]).toFixed(UD[newUnit]));
+    });
+  }
+  unit=newUnit;
+  syncUnit();
+  readContainerInputs();
+  recalc();
+}));
+
+document.getElementById('chk-cvt').addEventListener('change',e=>{autoCvt=e.target.checked});
+
+// Container preset
+document.getElementById('sel-preset').addEventListener('change',e=>{
+  const v=e.target.value;
+  if(!v) return;
+  const pr=PRESETS[v];
+  cont={L:pr.L,W:pr.W,H:pr.H};
+  setContainerInputs();
+  refreshContainerInfo();
+  recalc();
+});
+
+// Container inputs
+['c-L','c-W','c-H'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{readContainerInputs();refreshContainerInfo();recalc()});
+});
+
+// Add box
+document.getElementById('btn-add').addEventListener('click',()=>{
+  const ci=COLORS[boxes.length%COLORS.length];
+  boxes.push({id:nextId++,name:`产品${boxes.length>0?String.fromCharCode(65+boxes.length):'A'}`,
+    l:400,w:300,h:350,color:ci});
+  activeIdx=boxes.length-1;
+  renderTabs();renderForm();recalc();
+});
+
+// Resize handler - redraw canvases
+window.addEventListener('resize',()=>recalc());
+
+// ═══════════════════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════════════════
+
+syncUnit();
+renderTabs();
+renderForm();
+refreshContainerInfo();
+recalc();
+</script>
+</body>
+</html>
