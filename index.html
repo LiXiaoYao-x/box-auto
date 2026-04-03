@@ -100,7 +100,7 @@ input[type=text]:focus{border-color:var(--blue);background:#fff}
 canvas{display:block;width:100%}
 .cv-wrap{position:relative;border-radius:9px;overflow:hidden;cursor:grab;border:1.5px solid var(--bd);background:var(--bg2)}
 .cv-wrap:active{cursor:grabbing}
-.cv-legend{display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--t2);flex-wrap:wrap;font-weight:600}
+.cv-legend{display:flex;gap:14px;margin-top:12px;font-size:12px;color:var(--t2);flex-wrap:wrap;font-weight:600}
 .cv-leg-item{display:flex;align-items:center;gap:6px}
 
 /* Compare table */
@@ -137,7 +137,6 @@ canvas{display:block;width:100%}
 </head>
 <body>
 <div id="app">
-  <!-- Header -->
   <div class="hd">
     <h1>集装箱装载优化</h1>
     <p>垂直摆放约束 · 混合朝向算法（自动搜索最优排列）· 平面 &amp; 立体可视化</p>
@@ -155,17 +154,11 @@ canvas{display:block;width:100%}
         </label>
       </div>
       <button class="print-btn no-print" onclick="window.print()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 6 2 18 2 18 9"/>
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-          <rect x="6" y="14" width="12" height="8"/>
-        </svg>
-        打印报告
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>打印报告
       </button>
     </div>
   </div>
 
-  <!-- Container dims -->
   <div class="card">
     <div class="card-hd">
       <span class="ctitle"><span class="ctitle-bar"></span>集装箱内部尺寸</span>
@@ -185,7 +178,6 @@ canvas{display:block;width:100%}
     <div class="ibar" id="c-info"></div>
   </div>
 
-  <!-- Box types -->
   <div class="card">
     <div class="card-hd">
       <span class="ctitle"><span class="ctitle-bar"></span>产品箱子规格</span>
@@ -193,10 +185,9 @@ canvas{display:block;width:100%}
     </div>
     <div class="btabs" id="btabs"></div>
     <div id="bform"></div>
-    <div class="vnote">⚠ 液体产品垂直摆放，高度方向锁定不可翻转。系统自动枚举所有排列方案（原始朝向、旋转90°、混合双向排列），取最大装箱数。</div>
+    <div class="vnote">⚠ 液体产品垂直摆放，高度方向锁定不可翻转。系统自动枚举所有排列方案，取最大装箱数。</div>
   </div>
 
-  <!-- Results -->
   <div id="results"></div>
 </div>
 
@@ -207,10 +198,8 @@ const UF={mm:1,cm:10,m:1000};
 const UD={mm:0,cm:1,m:3};
 const COLORS=['#3a80e0','#e8762a','#18b09e','#c040b8','#d8c020','#28a860','#d84060','#7050e0'];
 const PRESETS={
-  '20std':{L:5898,W:2352,H:2393},
-  '40std':{L:12032,W:2352,H:2393},
-  '40hc': {L:12032,W:2352,H:2698},
-  '45hc': {L:13556,W:2352,H:2698},
+  '20std':{L:5898,W:2352,H:2393}, '40std':{L:12032,W:2352,H:2393},
+  '40hc': {L:12032,W:2352,H:2698}, '45hc': {L:13556,W:2352,H:2698},
 };
 
 let unit='cm';
@@ -220,22 +209,55 @@ let boxes=[{id:1,name:'产品A',l:400,w:300,h:350,color:COLORS[0]}];
 let activeIdx=0;
 let nextId=2;
 
-// ── Unit helpers ─────────────────────────────────────────
+// 防抖动优化（防止连续输入时内存飙升和页面卡死）
+let renderTimer = null;
+function requestRecalc() {
+    if(renderTimer) clearTimeout(renderTimer);
+    renderTimer = setTimeout(recalc, 120);
+}
+
 const mmToD=mm=>{const v=mm/UF[unit];const d=UD[unit];return d===0?Math.round(v):parseFloat(v.toFixed(d))};
 const dToMM=v=>(parseFloat(v)||0)*UF[unit];
 const fmt=mm=>mmToD(mm).toString();
 const fmtU=mm=>fmt(mm)+'\u202f'+unit;
 
-// ── Packing algorithm: vertical-lock + exhaustive mixed-strip ──
-//
-// For a box bl×bw footprint (bh locked as height), we try:
-//   1. Simple orientations: all bl×bw or all bw×bl
-//   2. Mixed W-strips: a strips of width=bw (orient bl×bw) +
-//                      b strips of width=bl (orient bw×bl), stacked in W
-//   3. Mixed L-strips: c strips of length=bl (orient bl×bw) +
-//                      d strips of length=bw (orient bw×bl), stacked in L
-// Returns the combination with maximum total boxes.
-//
+// ── 生成底面坐标系统（用于2D和3D一致性绘制） ──
+function buildLayerBoxes(best, bl) {
+    const lb = [];
+    if (!best.mixed) {
+        const type = best.rotated ? 'B' : 'A';
+        for(let c=0; c<best.nx; c++) {
+            for(let r=0; r<best.ny; r++) {
+                lb.push({x: c*best.bx, y: r*best.by, w: best.bx, l: best.by, type});
+            }
+        }
+    } else if (best.strips[0].dir === 'W') {
+        let wy = 0;
+        best.strips.forEach(s => {
+            const type = (s.bx === bl) ? 'A' : 'B';
+            for(let i=0; i<s.count; i++) {
+                for(let ix=0; ix<s.nbox; ix++) {
+                    lb.push({x: ix*s.bx, y: wy, w: s.bx, l: s.by, type});
+                }
+                wy += s.sw;
+            }
+        });
+    } else {
+        let wx = 0;
+        best.strips.forEach(s => {
+            const type = (s.bx === bl) ? 'A' : 'B';
+            for(let i=0; i<s.count; i++) {
+                for(let iy=0; iy<s.nbox; iy++) {
+                    lb.push({x: wx, y: iy*s.by, w: s.bx, l: s.by, type});
+                }
+                wx += s.sl;
+            }
+        });
+    }
+    return lb;
+}
+
+// ── Packing algorithm ──
 function calcPack(cL,cW,cH,bl,bw,bh){
   if(!cL||!cW||!cH||!bl||!bw||!bh)return null;
   if(bh>cH)return null;
@@ -245,13 +267,14 @@ function calcPack(cL,cW,cH,bl,bw,bh){
 
   let best=null;
   const tryR=r=>{
-    if(r&&r.total>0&&(!best||r.total>best.total||(r.total===best.total&&r.util>best.util)))best=r;
+    if(r&&r.total>0&&(!best||r.total>best.total||(r.total===best.total&&r.util>best.util))) best=r;
   };
 
   const mkSimple=(bx,by)=>{
     if(bx>cL||by>cW)return;
-    const nx=Math.floor(cL/bx),ny=Math.floor(cW/by);
-    const perLayer=nx*ny,total=perLayer*nz;
+    const nx=Math.floor(cL/bx), ny=Math.floor(cW/by);
+    if(nx>5000 || ny>5000) return; // 防死循环
+    const perLayer=nx*ny, total=perLayer*nz;
     if(!total)return;
     tryR({nx,ny,nz,total,bx,by,bz:bh,perLayer,
       remL:cL-nx*bx,remW:cW-ny*by,remH,
@@ -261,60 +284,50 @@ function calcPack(cL,cW,cH,bl,bw,bh){
   mkSimple(bl,bw);
   mkSimple(bw,bl);
 
-  if(bl===bw)return best; // square footprint — mixing won't help
+  if(bl!==bw) {
+      const nA=Math.floor(cL/bl), nB=Math.floor(cL/bw);
+      if(nA <= 5000 && nB <= 5000) {
+          const maxA=Math.floor(cW/bw);
+          for(let a=0;a<=maxA;a++){
+            const b=Math.floor((cW-a*bw)/bl);
+            if(a+b===0)continue;
+            const perLayer=a*nA+b*nB;
+            const total=perLayer*nz;
+            if(!total)continue;
+            const hasMix=a>0&&b>0;
+            const stripsArr=[];
+            if(a>0)stripsArr.push({dir:'W',count:a,sw:bw,nbox:nA,bx:bl,by:bw});
+            if(b>0)stripsArr.push({dir:'W',count:b,sw:bl,nbox:nB,bx:bw,by:bl});
+            tryR({nz,total,bz:bh,perLayer,remL:0,remW:cW-(a*bw+b*bl),remH,
+              util:total*bl*bw*bh/(cL*cW*cH)*100,rotated:false,mixed:hasMix,strips:hasMix?stripsArr:null,
+              nx:Math.max(nA,nB),ny:a+b,bx:bl,by:bw});
+          }
+      }
 
-  // ─ Mixed W-strips ─
-  // TypeA: width=bw, perStrip=floor(cL/bl)   TypeB: width=bl, perStrip=floor(cL/bw)
-  const nA=Math.floor(cL/bl), nB=Math.floor(cL/bw);
-  {
-    const maxA=Math.floor(cW/bw);
-    for(let a=0;a<=maxA;a++){
-      const b=Math.floor((cW-a*bw)/bl);
-      if(a+b===0)continue;
-      const perLayer=a*nA+b*nB;
-      const total=perLayer*nz;
-      if(!total)continue;
-      const hasMix=a>0&&b>0;
-      const stripsArr=[];
-      if(a>0)stripsArr.push({dir:'W',count:a,sw:bw,nbox:nA,bx:bl,by:bw});
-      if(b>0)stripsArr.push({dir:'W',count:b,sw:bl,nbox:nB,bx:bw,by:bl});
-      tryR({nz,total,bz:bh,perLayer,
-        remL:0,remW:cW-(a*bw+b*bl),remH,
-        util:total*bl*bw*bh/(cL*cW*cH)*100,
-        rotated:false,mixed:hasMix,strips:hasMix?stripsArr:null,
-        nx:Math.max(nA,nB),ny:a+b,bx:bl,by:bw,
-        _wMix:{a,b,nA,nB}});
-    }
+      const nC=Math.floor(cW/bw), nD=Math.floor(cW/bl);
+      if(nC <= 5000 && nD <= 5000) {
+          const maxC=Math.floor(cL/bl);
+          for(let c=0;c<=maxC;c++){
+            const d=Math.floor((cL-c*bl)/bw);
+            if(c+d===0)continue;
+            const perLayer=c*nC+d*nD;
+            const total=perLayer*nz;
+            if(!total)continue;
+            const hasMix=c>0&&d>0;
+            const stripsArr=[];
+            if(c>0)stripsArr.push({dir:'L',count:c,sl:bl,nbox:nC,bx:bl,by:bw});
+            if(d>0)stripsArr.push({dir:'L',count:d,sl:bw,nbox:nD,bx:bw,by:bl});
+            tryR({nz,total,bz:bh,perLayer,remL:cL-(c*bl+d*bw),remW:0,remH,
+              util:total*bl*bw*bh/(cL*cW*cH)*100,rotated:false,mixed:hasMix,strips:hasMix?stripsArr:null,
+              nx:c+d,ny:Math.max(nC,nD),bx:bl,by:bw});
+          }
+      }
   }
 
-  // ─ Mixed L-strips ─
-  // TypeC: length=bl, perStrip=floor(cW/bw)  TypeD: length=bw, perStrip=floor(cW/bl)
-  const nC=Math.floor(cW/bw), nD=Math.floor(cW/bl);
-  {
-    const maxC=Math.floor(cL/bl);
-    for(let c=0;c<=maxC;c++){
-      const d=Math.floor((cL-c*bl)/bw);
-      if(c+d===0)continue;
-      const perLayer=c*nC+d*nD;
-      const total=perLayer*nz;
-      if(!total)continue;
-      const hasMix=c>0&&d>0;
-      const stripsArr=[];
-      if(c>0)stripsArr.push({dir:'L',count:c,sl:bl,nbox:nC,bx:bl,by:bw});
-      if(d>0)stripsArr.push({dir:'L',count:d,sl:bw,nbox:nD,bx:bw,by:bl});
-      tryR({nz,total,bz:bh,perLayer,
-        remL:cL-(c*bl+d*bw),remW:0,remH,
-        util:total*bl*bw*bh/(cL*cW*cH)*100,
-        rotated:false,mixed:hasMix,strips:hasMix?stripsArr:null,
-        nx:c+d,ny:Math.max(nC,nD),bx:bl,by:bw,
-        _lMix:{c,d,nC,nD}});
-    }
-  }
-
+  if (best) best.layerBoxes = buildLayerBoxes(best, bl);
   return best;
 }
 
-// ── UI helpers ───────────────────────────────────────────
 function syncUnit(){
   document.querySelectorAll('.ulbl').forEach(el=>el.textContent=unit);
   document.querySelectorAll('.ubtn').forEach(btn=>btn.classList.toggle('on',btn.dataset.u===unit));
@@ -336,7 +349,6 @@ function readContainerInputs(){
 }
 function escHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
-// ── Box tabs & form ──────────────────────────────────────
 function renderTabs(){
   const el=document.getElementById('btabs');
   el.innerHTML='';
@@ -351,7 +363,7 @@ function renderTabs(){
         boxes.splice(+e.target.dataset.del,1);
         activeIdx=Math.min(activeIdx,boxes.length-1);
       }else{activeIdx=i}
-      renderTabs();renderForm();recalc();
+      renderTabs();renderForm();requestRecalc();
     });
     el.appendChild(btn);
   });
@@ -376,24 +388,19 @@ function renderForm(){
       l:dToMM(document.getElementById('b-l').value),
       w:dToMM(document.getElementById('b-w').value),
       h:dToMM(document.getElementById('b-h').value)};
-    renderTabs();recalc();
+    renderTabs();requestRecalc();
   };
   ['b-name','b-l','b-w','b-h'].forEach(id=>document.getElementById(id).addEventListener('input',save));
 }
 
-// ── Strip description for detail list ───────────────────
 function buildStripDesc(p){
   if(!p.strips)return null;
   return p.strips.map(s=>{
-    if(s.dir==='W'){
-      return `${s.count}排 × ${s.nbox}箱/排（底面 ${fmt(s.bx)}×${fmt(s.by)} ${unit}）`;
-    }else{
-      return `${s.count}列 × ${s.nbox}箱/列（底面 ${fmt(s.bx)}×${fmt(s.by)} ${unit}）`;
-    }
+    if(s.dir==='W') return `${s.count}排 × ${s.nbox}箱/排（底面 ${fmt(s.bx)}×${fmt(s.by)} ${unit}）`;
+    return `${s.count}列 × ${s.nbox}箱/列（底面 ${fmt(s.bx)}×${fmt(s.by)} ${unit}）`;
   }).join(' + ');
 }
 
-// ── Results rendering ────────────────────────────────────
 function recalc(){
   readContainerInputs();
   refreshContainerInfo();
@@ -408,8 +415,6 @@ function recalc(){
   }
 
   let html='';
-
-  // Comparison table
   if(boxes.length>1){
     html+=`<div class="card">
       <div class="card-hd"><span class="ctitle"><span class="ctitle-bar"></span>产品对比</span></div>
@@ -432,7 +437,6 @@ function recalc(){
     html+=`</tbody></table></div></div>`;
   }
 
-  // Per-box detail
   packs.forEach(({b,p},idx)=>{
     if(!p||p.total===0){
       html+=`<div class="card"><div class="msg">⚠ ${escHtml(b.name)}：箱子尺寸超出集装箱，无法装载</div></div>`;
@@ -440,11 +444,9 @@ function recalc(){
     }
     const uc=p.util>=85?'var(--teal)':p.util>=70?'var(--amber)':'var(--red)';
 
-    // Orient description
     let orientText;
     if(p.mixed&&p.strips){
-      const dir=p.strips[0].dir==='W'?'宽度方向混排':'长度方向混排';
-      orientText=`${dir} <span class="new-badge">优化</span>`;
+      orientText=`${p.strips[0].dir==='W'?'宽度方向混排':'长度方向混排'} <span class="new-badge">优化</span>`;
     }else if(p.rotated){
       orientText=`底面旋转90° (${fmt(p.bx)}×${fmt(p.by)} ${unit})`;
     }else{
@@ -454,7 +456,6 @@ function recalc(){
     const stripDesc=buildStripDesc(p);
     const stripRow=stripDesc?`<li><span class="dk">排列方案</span><span class="dv" style="color:var(--blue);font-size:12px">${stripDesc}</span></li>`:'';
 
-    // Remainder display: for mixed, one axis is subdivided, show "—" for that axis
     const showRemL=p.strips&&p.strips[0].dir==='W'?'—':fmt(p.remL)+'<small style="font-size:10px;margin-left:1px">'+unit+'</small>';
     const showRemW=p.strips&&p.strips[0].dir==='L'?'—':fmt(p.remW)+'<small style="font-size:10px;margin-left:1px">'+unit+'</small>';
 
@@ -502,25 +503,26 @@ function recalc(){
         <span class="ctitle"><span class="ctitle-bar"></span>平面布局（俯视图）</span>
         <span style="font-size:11px;color:var(--t3);font-weight:600">每格代表1箱</span>
       </div>
-      <div class="cv-wrap"><canvas id="cv2d-${idx}" height="220"></canvas></div>
-      ${p.mixed&&p.strips?`
+      <div class="cv-wrap"><canvas id="cv2d-${idx}" height="235"></canvas></div>
       <div class="cv-legend">
         <div class="cv-leg-item">
-          <span style="width:14px;height:10px;background:${b.color}50;border:1.5px solid ${b.color}cc;border-radius:2px;display:inline-block"></span>
-          朝向A（${fmt(p.strips[0].bx)}×${fmt(p.strips[0].by)} ${unit}）
+          <span style="width:14px;height:10px;background:${b.color}cc;border:1.5px solid ${b.color};border-radius:2px;display:inline-block"></span>
+          原始朝向（${fmt(b.l)}×${fmt(b.w)} ${unit}）
         </div>
         <div class="cv-leg-item">
-          <span style="width:14px;height:10px;background:${b.color}18;border:1.5px dashed ${b.color}88;border-radius:2px;display:inline-block"></span>
-          朝向B（${fmt(p.strips[1]?p.strips[1].bx:p.strips[0].bx)}×${fmt(p.strips[1]?p.strips[1].by:p.strips[0].by)} ${unit}）
+          <span style="width:14px;height:10px;background:${b.color}44;border:1.5px dashed ${b.color};border-radius:2px;display:inline-block;position:relative;overflow:hidden">
+            <span style="position:absolute;top:-5px;bottom:-5px;left:6px;width:1.5px;background:${b.color}88;transform:rotate(45deg)"></span>
+          </span>
+          旋转90°（${fmt(b.w)}×${fmt(b.l)} ${unit}）
         </div>
-      </div>`:''}
+      </div>
     </div>
     <div class="card">
       <div class="card-hd">
         <span class="ctitle"><span class="ctitle-bar"></span>立体示意（等轴视图）</span>
-        <span style="font-size:11px;color:var(--t3);font-weight:600">拖拽旋转</span>
+        <span style="font-size:11px;color:var(--t3);font-weight:600">拖拽旋转视角</span>
       </div>
-      <div class="cv-wrap"><canvas id="cviso-${idx}" height="300"></canvas></div>
+      <div class="cv-wrap"><canvas id="cviso-${idx}" height="320"></canvas></div>
     </div>`;
   });
 
@@ -537,106 +539,94 @@ function recalc(){
   });
 }
 
-// ── 2D Floor plan canvas ─────────────────────────────────
 function drawFloor(cv,p,b){
   const dpr=window.devicePixelRatio||1;
-  const W=cv.parentElement.offsetWidth||300;
-  const H=220;
+  const W=cv.parentElement.offsetWidth||300, H=235;
   cv.width=W*dpr;cv.height=H*dpr;
   const ctx=cv.getContext('2d');
   ctx.scale(dpr,dpr);
 
-  const PL=26,PR=8,PT=10,PB=22;
-  const dw=W-PL-PR,dh=H-PT-PB;
-  const cL=cont.L,cW=cont.W;
-  const sx=dw/cL,sy=dh/cW;
+  const PL=45, PR=15, PT=25, PB=25;
+  const dw=W-PL-PR, dh=H-PT-PB;
+  const cL=cont.L, cW=cont.W;
+  const sx=dw/cL, sy=dh/cW;
 
-  // Background
   ctx.fillStyle='#f7fafc';ctx.fillRect(0,0,W,H);
 
   const col=b.color;
-  const fill1=col+'50',stroke1=col+'cc';
-  const fill2=col+'18',stroke2=col+'88';
+  const fillA=col+'cc', strokeA=col;
+  const fillB=col+'44', strokeB=col;
 
-  const drawBox=(px,py,pw,ph,fill,stroke,dashed)=>{
-    ctx.fillStyle=fill;ctx.fillRect(px+.5,py+.5,pw-1,ph-1);
-    if(dashed)ctx.setLineDash([2,2]);
-    ctx.strokeStyle=stroke;ctx.lineWidth=.7;
-    ctx.strokeRect(px+.5,py+.5,pw-1,ph-1);
-    if(dashed)ctx.setLineDash([]);
-  };
-
-  const drawRem=(px,py,pw,ph)=>{
-    if(pw<=0||ph<=0)return;
-    ctx.fillStyle='rgba(220,50,50,.06)';ctx.fillRect(px,py,pw,ph);
-    ctx.setLineDash([3,3]);
-    ctx.strokeStyle='rgba(220,50,50,.4)';ctx.lineWidth=.8;
-    ctx.strokeRect(px,py,pw,ph);
-    ctx.setLineDash([]);
-  };
-
-  if(p.strips){
-    const dir=p.strips[0].dir;
-    if(dir==='W'){
-      // Strips stacked along W axis
-      let wy=0;
-      p.strips.forEach((strip,si)=>{
-        const isB=si%2!==0;
-        for(let s=0;s<strip.count;s++){
-          for(let ix=0;ix<strip.nbox;ix++){
-            drawBox(PL+ix*strip.bx*sx, PT+wy*sy, strip.bx*sx, strip.by*sy,
-              isB?fill2:fill1, isB?stroke2:stroke1, isB);
-          }
-          wy+=strip.sw;
-        }
-      });
-      // W remainder
-      const usedW=p.strips.reduce((s,st)=>s+st.count*st.sw,0);
-      if(usedW<cW)drawRem(PL,PT+usedW*sy,dw,(cW-usedW)*sy);
-      // L remainder per strip type
-      p.strips.forEach((strip,si)=>{
-        const usedL=strip.nbox*strip.bx;
-        if(usedL<cL){
-          // draw subtle L remainder zone for first strip group only
-          if(si===0){
-            drawRem(PL+usedL*sx,PT,(cL-usedL)*sx,strip.count*strip.sw*sy);
-          }
-        }
-      });
-    }else{
-      // Strips stacked along L axis
-      let wx=0;
-      p.strips.forEach((strip,si)=>{
-        const isB=si%2!==0;
-        for(let s=0;s<strip.count;s++){
-          for(let iy=0;iy<strip.nbox;iy++){
-            drawBox(PL+wx*sx, PT+iy*strip.by*sy, strip.bx*sx, strip.by*sy,
-              isB?fill2:fill1, isB?stroke2:stroke1, isB);
-          }
-          wx+=strip.sl;
-        }
-      });
-      // L remainder
-      const usedL=p.strips.reduce((s,st)=>s+st.count*st.sl,0);
-      if(usedL<cL)drawRem(PL+usedL*sx,PT,(cL-usedL)*sx,dh);
-    }
-  }else{
-    // Simple grid
-    const{nx,ny,bx,by,remL,remW}=p;
-    for(let c=0;c<nx;c++) for(let r=0;r<ny;r++){
-      drawBox(PL+c*bx*sx,PT+r*by*sy,bx*sx,by*sy,fill1,stroke1,false);
-    }
-    if(remL>0&&nx>0)drawRem(PL+nx*bx*sx,PT,remL*sx,dh);
-    if(remW>0&&ny>0)drawRem(PL,PT+ny*by*sy,dw,remW*sy);
-  }
-
-  // Container border
+  // Draw container border
+  ctx.fillStyle='#ffffff';ctx.fillRect(PL,PT,dw,dh);
   ctx.strokeStyle='rgba(37,99,235,.55)';ctx.lineWidth=1.5;
   ctx.strokeRect(PL,PT,dw,dh);
 
-  // Axis caption
-  ctx.fillStyle='#8fa5be';ctx.font='600 10px sans-serif';ctx.textAlign='center';
-  ctx.fillText(`长 ${fmtU(cL)} · ${p.perLayer} 箱/层`,PL+dw/2,H-4);
+  // Draw Boxes based on unified layerBoxes
+  p.layerBoxes.forEach(box => {
+      const isB = box.type === 'B';
+      const px = PL + box.x * sx;
+      const py = PT + box.y * sy;
+      const pw = box.w * sx;
+      const ph = box.l * sy;
+
+      ctx.fillStyle = isB ? fillB : fillA;
+      ctx.fillRect(px, py, pw, ph);
+
+      // Distinct visual pattern for Type B
+      if(isB){
+          ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+pw,py+ph);
+          ctx.strokeStyle=col+'88';ctx.lineWidth=0.8;ctx.stroke();
+      }
+
+      ctx.strokeStyle = isB ? strokeB : strokeA;
+      ctx.lineWidth = 1;
+      if(isB) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
+      ctx.strokeRect(px, py, pw, ph);
+  });
+  ctx.setLineDash([]);
+
+  // 余量区域提示
+  const drawRem=(px,py,pw,ph)=>{
+    if(pw<=0||ph<=0)return;
+    ctx.fillStyle='rgba(220,50,50,.06)';ctx.fillRect(px,py,pw,ph);
+    ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(220,50,50,.4)';
+    ctx.lineWidth=0.8;ctx.strokeRect(px,py,pw,ph);ctx.setLineDash([]);
+  };
+
+  if(!p.mixed){
+    if(p.remL>0) drawRem(PL+p.nx*p.bx*sx, PT, p.remL*sx, dh);
+    if(p.remW>0) drawRem(PL, PT+p.ny*p.by*sy, dw, p.remW*sy);
+  }
+
+  // Draw Row/Col Sequence Labels
+  ctx.fillStyle='#4a6280';ctx.font='600 11px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+
+  if(!p.mixed){
+      ctx.fillText(`${p.nx} 箱`, PL+dw/2, PT-10);
+      ctx.fillText(`${p.ny} 排`, PL/2, PT+dh/2);
+  } else {
+      if(p.strips[0].dir==='W'){
+          ctx.fillText(`每排最多 ${p.strips[0].nbox} 箱`, PL+dw/2, PT-10);
+          let wy=0;
+          p.strips.forEach(s=>{
+              const h=s.count*s.sw*sy;
+              ctx.fillText(`${s.count}排`, PL/2, PT+wy+h/2);
+              wy+=h;
+          });
+      } else {
+          ctx.fillText(`每列最多 ${p.strips[0].nbox} 箱`, PL/2-5, PT+dh/2);
+          let wx=0;
+          p.strips.forEach(s=>{
+              const w=s.count*s.sl*sx;
+              ctx.fillText(`${s.count}列`, PL+wx+w/2, PT-10);
+              wx+=w;
+          });
+      }
+  }
+  ctx.fillStyle='#8fa5be';ctx.font='600 10px sans-serif';
+  ctx.fillText(`长 ${fmtU(cL)} · ${p.perLayer} 箱/层`, PL+dw/2, H-10);
 }
 
 // ── 3D Isometric canvas ──────────────────────────────────
@@ -651,16 +641,23 @@ function shade(rgb,f){return`rgb(${Math.round(Math.min(255,rgb[0]*f))},${Math.ro
 
 function drawIso(cv,p,b,rY,rX){
   const dpr=window.devicePixelRatio||1;
-  const W=cv.parentElement.offsetWidth||300,H=300;
+  const W=cv.parentElement.offsetWidth||300, H=320;
   cv.width=W*dpr;cv.height=H*dpr;
   const ctx=cv.getContext('2d');
   ctx.scale(dpr,dpr);
   ctx.fillStyle='#f0f4f8';ctx.fillRect(0,0,W,H);
 
-  const{nx,ny,nz,bx,by,bz}=p;
-  const cL=cont.L,cW=cont.W,cH=cont.H;
-  const scale=Math.min(W,H)*0.38/Math.max(cL,cW,cH);
-  const ocx=W/2,ocy=H*0.54;
+  const{nz,bz}=p;
+  const cL=cont.L, cW=cont.W, cH=cont.H;
+
+  // 动态计算包围盒自适应缩放（防止大箱子时缩得太小）
+  const isoW = Math.abs(cL * Math.cos(rY)) + Math.abs(cW * Math.sin(rY));
+  const isoH = Math.abs(cL * Math.sin(rY) * Math.sin(Math.abs(rX)))
+             + Math.abs(cW * Math.cos(rY) * Math.sin(Math.abs(rX)))
+             + Math.abs(cH * Math.cos(Math.abs(rX)));
+  const scale = Math.min(W * 0.85 / isoW, H * 0.80 / isoH);
+  
+  const ocx=W/2,ocy=H/2 + (cH*scale*0.4); // 调整重心
   const PR=(wx,wy2,wz)=>proj(wx-cL/2,wy2-cW/2,wz-cH/2,rY,rX,scale,ocx,ocy);
 
   // Wireframe
@@ -670,8 +667,9 @@ function drawIso(cv,p,b,rY,rX){
   ctx.strokeStyle='rgba(37,99,235,.35)';ctx.lineWidth=.8;
   CE.forEach(([a,b2])=>{ctx.beginPath();ctx.moveTo(Cp[a].sx,Cp[a].sy);ctx.lineTo(Cp[b2].sx,Cp[b2].sy);ctx.stroke()});
 
-  const rgb=hexRgb(b.color);
-  const total=nx*ny*nz;
+  const rgbA=hexRgb(b.color);
+  // Type B使用更高明度，拉开立体感色彩差异
+  const rgbB=[Math.min(255,rgbA[0]+65), Math.min(255,rgbA[1]+65), Math.min(255,rgbA[2]+45)]; 
 
   const drawFace=(pts,clr)=>{
     ctx.beginPath();ctx.moveTo(pts[0].sx,pts[0].sy);
@@ -680,60 +678,42 @@ function drawIso(cv,p,b,rY,rX){
     ctx.strokeStyle='rgba(0,0,0,.08)';ctx.lineWidth=.3;ctx.stroke();
   };
 
-  if(total<=1800){
-    const items=[];
-    for(let iz=0;iz<nz;iz++) for(let iy=0;iy<ny;iy++) for(let ix=0;ix<nx;ix++){
-      const{d}=PR(ix*bx+bx/2,iy*by+by/2,iz*bz+bz/2);
-      items.push({ix,iy,iz,d});
-    }
-    items.sort((a,b2)=>a.d-b2.d);
-    items.forEach(({ix,iy,iz})=>{
-      const wx=ix*bx,wy2=iy*by,wz=iz*bz;
+  const items = [];
+  const drawLimit = 2500; // 防卡死上限，数量过大时合并为整列渲染
+  
+  if (p.total <= drawLimit) {
+      for(let iz=0; iz<nz; iz++){
+          p.layerBoxes.forEach(box => {
+              items.push({x:box.x, y:box.y, z:iz*bz, w:box.w, l:box.l, h:bz, type:box.type, d: PR(box.x+box.w/2, box.y+box.l/2, iz*bz+bz/2).d});
+          });
+      }
+  } else {
+      // 合并为垂向通天柱，大幅节约性能同时保持顶部混合图案
+      p.layerBoxes.forEach(box => {
+          items.push({x:box.x, y:box.y, z:0, w:box.w, l:box.l, h:nz*bz, type:box.type, d: PR(box.x+box.w/2, box.y+box.l/2, nz*bz/2).d});
+      });
+  }
+
+  items.sort((a,b2)=>a.d - b2.d);
+
+  items.forEach(box => {
+      const wx=box.x, wy2=box.y, wz=box.z;
+      const bx=box.w, by=box.l, bh=box.h;
       const p00=PR(wx,wy2,wz),p10=PR(wx+bx,wy2,wz),p01=PR(wx,wy2+by,wz),p11=PR(wx+bx,wy2+by,wz);
-      const p00t=PR(wx,wy2,wz+bz),p10t=PR(wx+bx,wy2,wz+bz),p01t=PR(wx,wy2+by,wz+bz),p11t=PR(wx+bx,wy2+by,wz+bz);
+      const p00t=PR(wx,wy2,wz+bh),p10t=PR(wx+bx,wy2,wz+bh),p01t=PR(wx,wy2+by,wz+bh),p11t=PR(wx+bx,wy2+by,wz+bh);
       const faces=[
         {pts:[p00,p10,p11,p01],f:.52},{pts:[p00t,p10t,p11t,p01t],f:.95},
         {pts:[p00,p10,p10t,p00t],f:.65},{pts:[p10,p11,p11t,p10t],f:.42},
         {pts:[p00,p01,p01t,p00t],f:.72},{pts:[p01,p11,p11t,p01t],f:.48},
       ].map(fa=>({...fa,d:fa.pts.reduce((s,pt)=>s+pt.d,0)/fa.pts.length}));
       faces.sort((a,b2)=>a.d-b2.d);
-      faces.forEach(({pts,f})=>drawFace(pts,shade(rgb,f)));
-    });
-  }else{
-    for(let iz=0;iz<nz;iz++){
-      const wz=iz*bz,t=iz/(Math.max(1,nz-1)),lf=0.62+0.38*t;
-      const ex=nx*bx,ey=ny*by;
-      const p00=PR(0,0,wz),p10=PR(ex,0,wz),p01=PR(0,ey,wz),p11=PR(ex,ey,wz);
-      const p00t=PR(0,0,wz+bz),p10t=PR(ex,0,wz+bz),p01t=PR(0,ey,wz+bz),p11t=PR(ex,ey,wz+bz);
-      const faces=[
-        {pts:[p00,p10,p11,p01],f:lf*.52},{pts:[p00t,p10t,p11t,p01t],f:lf*.95},
-        {pts:[p00,p10,p10t,p00t],f:lf*.65},{pts:[p10,p11,p11t,p10t],f:lf*.42},
-        {pts:[p00,p01,p01t,p00t],f:lf*.72},{pts:[p01,p11,p11t,p01t],f:lf*.48},
-      ].map(fa=>({...fa,d:fa.pts.reduce((s,pt)=>s+pt.d,0)/fa.pts.length}));
-      faces.sort((a,b2)=>a.d-b2.d);
-      faces.forEach(({pts,f})=>drawFace(pts,shade(rgb,f)));
-      if(iz===nz-1||nz<=4){
-        ctx.strokeStyle=b.color+'40';ctx.lineWidth=.4;
-        for(let ix=0;ix<=nx;ix++){
-          const t2=ix/nx;
-          ctx.beginPath();
-          ctx.moveTo(p00t.sx+(p10t.sx-p00t.sx)*t2,p00t.sy+(p10t.sy-p00t.sy)*t2);
-          ctx.lineTo(p01t.sx+(p11t.sx-p01t.sx)*t2,p01t.sy+(p11t.sy-p01t.sy)*t2);
-          ctx.stroke();
-        }
-        for(let iy=0;iy<=ny;iy++){
-          const t2=iy/ny;
-          ctx.beginPath();
-          ctx.moveTo(p00t.sx+(p01t.sx-p00t.sx)*t2,p00t.sy+(p01t.sy-p00t.sy)*t2);
-          ctx.lineTo(p10t.sx+(p11t.sx-p10t.sx)*t2,p10t.sy+(p11t.sy-p10t.sy)*t2);
-          ctx.stroke();
-        }
-      }
-    }
-  }
+      
+      const cRgb = box.type === 'B' ? rgbB : rgbA;
+      faces.forEach(({pts,f})=>drawFace(pts,shade(cRgb,f)));
+  });
 
   ctx.fillStyle=b.color;ctx.font='700 12px sans-serif';ctx.textAlign='center';
-  ctx.fillText(`${nz}层 × ${p.perLayer}箱/层 = ${total.toLocaleString()}箱`,W/2,H-10);
+  ctx.fillText(`${nz}层 × ${p.perLayer}箱/层 = ${p.total.toLocaleString()}箱`,W/2,H-12);
 }
 
 function initIso(cv,p,b){
@@ -765,13 +745,20 @@ document.querySelectorAll('.ubtn').forEach(btn=>btn.addEventListener('click',()=
   const nu=btn.dataset.u;
   if(nu===unit)return;
   autoCvt=document.getElementById('chk-cvt').checked;
+  const factor = UF[unit] / UF[nu];
+  
   if(autoCvt){
-    [...['c-L','c-W','c-H'],...['b-l','b-w','b-h']].forEach(id=>{
+    ['c-L','c-W','c-H','b-l','b-w','b-h'].forEach(id=>{
       const el=document.getElementById(id);
-      if(el)el.value=parseFloat((parseFloat(el.value)*UF[unit]/UF[nu]).toFixed(UD[nu]));
+      if(el)el.value=parseFloat((parseFloat(el.value)*factor).toFixed(UD[nu]));
     });
+    unit=nu; readContainerInputs();
+  } else {
+    // 若不自动换算，强制保留面板数字本身，这意味着实际物理尺寸(mm)发生改变，因此需整体转换boxes内部存储的毫米值
+    boxes.forEach(b=>{ b.l *= factor; b.w *= factor; b.h *= factor; });
+    unit=nu; readContainerInputs(); 
   }
-  unit=nu;syncUnit();readContainerInputs();recalc();
+  syncUnit(); requestRecalc();
 }));
 
 document.getElementById('chk-cvt').addEventListener('change',e=>{autoCvt=e.target.checked});
@@ -780,24 +767,23 @@ document.getElementById('sel-preset').addEventListener('change',e=>{
   const pr=PRESETS[e.target.value];
   if(!pr)return;
   cont={L:pr.L,W:pr.W,H:pr.H};
-  setContainerInputs();refreshContainerInfo();recalc();
+  setContainerInputs();refreshContainerInfo();requestRecalc();
 });
 
 ['c-L','c-W','c-H'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',()=>{readContainerInputs();refreshContainerInfo();recalc()});
+  document.getElementById(id).addEventListener('input',()=>{readContainerInputs();refreshContainerInfo();requestRecalc()});
 });
 
 document.getElementById('btn-add').addEventListener('click',()=>{
   boxes.push({id:nextId++,name:`产品${String.fromCharCode(65+boxes.length)}`,
     l:400,w:300,h:350,color:COLORS[boxes.length%COLORS.length]});
   activeIdx=boxes.length-1;
-  renderTabs();renderForm();recalc();
+  renderTabs();renderForm();requestRecalc();
 });
 
-window.addEventListener('resize',()=>recalc());
+window.addEventListener('resize',()=>requestRecalc());
 
-// ── Init ─────────────────────────────────────────────────
-syncUnit();renderTabs();renderForm();refreshContainerInfo();recalc();
+syncUnit();renderTabs();renderForm();refreshContainerInfo();requestRecalc();
 </script>
 </body>
 </html>
